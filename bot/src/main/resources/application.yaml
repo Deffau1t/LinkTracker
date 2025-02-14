@@ -3,7 +3,7 @@ app:
 
 spring:
   application:
-    name: Bot
+    name: DMLinkUpdateBot
   liquibase:
     enabled: false
   jpa:
