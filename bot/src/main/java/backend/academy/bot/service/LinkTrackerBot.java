@@ -1,11 +1,10 @@
 package backend.academy.bot.service;
 
+import backend.academy.bot.BotConfig;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -13,21 +12,21 @@ public class LinkTrackerBot {
     private final TelegramBot bot;
     private final LinkUpdateService linkUpdateService;
 
-    public LinkTrackerBot(@Value("${app.telegram-token}") String token,
+    public LinkTrackerBot(BotConfig botConfig,
                           LinkUpdateService linkUpdateService) {
         this.linkUpdateService = linkUpdateService;
-        this.bot = new TelegramBot(token);
+        this.bot = new TelegramBot(botConfig.telegramToken());
+
 
         this.bot.setUpdatesListener(
             updates -> {
                 for (Update update : updates) {
                     confirmUpdate(update);
-                }
+                    }
                 return UpdatesListener.CONFIRMED_UPDATES_ALL;
             }
         );
     }
-
 
     private void confirmUpdate(Update update) {
         if (update.message() != null && update.message().text() != null) {

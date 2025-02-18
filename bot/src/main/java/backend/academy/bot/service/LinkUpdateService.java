@@ -34,13 +34,28 @@ public class LinkUpdateService {
     }
 
     public void trackCommand(Long chatId, String link) {
-        chatSubscribes.computeIfAbsent(chatId, _ -> new ArrayList<>()).add(link);
-        linkTrackerBot.sendMessage(chatId, "Ссылка успешно добавлена.");
+        if (link.isEmpty()) {
+            linkTrackerBot.sendMessage(chatId, "Некорректная ссылка для добавления.");
+        } else {
+            chatSubscribes.computeIfAbsent(chatId, _ -> new ArrayList<>()).add(link);
+            linkTrackerBot.sendMessage(chatId, "Ссылка успешно добавлена.");
+        }
     }
 
     public void untrackCommand(Long chatId, String link) {
-        if (!chatSubscribes.get(chatId).isEmpty()) {
-            chatSubscribes.get(chatId).remove(link);
+        if (link.isEmpty()) {
+            linkTrackerBot.sendMessage(chatId, "Некорректная ссылка для удаления.");
+            return;
+        }
+
+        List<String> links = chatSubscribes.get(chatId);
+        if (links == null || links.isEmpty()) {
+            linkTrackerBot.sendMessage(chatId, "Вы не были подписаны на эту ссылку.");
+            return;
+        }
+
+        boolean removed = links.remove(link);
+        if (removed) {
             linkTrackerBot.sendMessage(chatId, "Ссылка успешно удалена.");
         } else {
             linkTrackerBot.sendMessage(chatId, "Вы не были подписаны на эту ссылку.");
@@ -49,10 +64,16 @@ public class LinkUpdateService {
 
     public void listCommand(Long chatId) {
         StringBuilder linksList = new StringBuilder();
-        for (String link : chatSubscribes.get(chatId)) {
-            linksList.append(link);
+        List<String> linksOfChatId = chatSubscribes.get(chatId);
+        if (linksOfChatId == null || linksOfChatId.isEmpty()) {
+            linkTrackerBot.sendMessage(chatId, "Ссылки отсутствуют.");
+        } else {
+            for (String link : chatSubscribes.get(chatId)) {
+                linksList.append(link);
+            }
+            linkTrackerBot.sendMessage(chatId, "Ваши ссылки:\n" + linksList);
         }
-        linkTrackerBot.sendMessage(chatId, "Ваши ссылки:\n" + linksList.toString());
+
     }
 
     public void unknownCommand(Long chatId) {
