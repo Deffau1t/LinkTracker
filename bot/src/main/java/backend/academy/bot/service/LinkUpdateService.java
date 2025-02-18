@@ -1,17 +1,19 @@
 package backend.academy.bot.service;
 
+import backend.academy.bot.model.LinkUpdate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import backend.academy.bot.model.LinkUpdate;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class LinkUpdateService {
 
     @Autowired
@@ -44,37 +46,35 @@ public class LinkUpdateService {
     }
 
     public void untrackCommand(Long chatId, String link) {
-        if (link.isEmpty()) {
+        try {
+            List<String> links = chatSubscribes.get(chatId);
+            boolean removed = links.remove(link);
+            if (removed) {
+                linkTrackerBot.sendMessage(chatId, "Ссылка успешно удалена.");
+            } else {
+                linkTrackerBot.sendMessage(chatId, "Вы не были подписаны на эту ссылку.");
+            }
+        } catch (NullPointerException nullPointerException) {
             linkTrackerBot.sendMessage(chatId, "Некорректная ссылка для удаления.");
-            return;
-        }
-
-        List<String> links = chatSubscribes.get(chatId);
-        if (links == null || links.isEmpty()) {
-            linkTrackerBot.sendMessage(chatId, "Вы не были подписаны на эту ссылку.");
-            return;
-        }
-
-        boolean removed = links.remove(link);
-        if (removed) {
-            linkTrackerBot.sendMessage(chatId, "Ссылка успешно удалена.");
-        } else {
-            linkTrackerBot.sendMessage(chatId, "Вы не были подписаны на эту ссылку.");
+            log.error(nullPointerException.getMessage());
+        } catch (Exception e) {
+            linkTrackerBot.sendMessage(chatId, "Что-то пошло не так...");
+            log.error(e.getMessage());
         }
     }
 
     public void listCommand(Long chatId) {
         StringBuilder linksList = new StringBuilder();
-        List<String> linksOfChatId = chatSubscribes.get(chatId);
-        if (linksOfChatId == null || linksOfChatId.isEmpty()) {
-            linkTrackerBot.sendMessage(chatId, "Ссылки отсутствуют.");
-        } else {
-            for (String link : chatSubscribes.get(chatId)) {
+        try {
+            List<String> linksOfChatId = chatSubscribes.get(chatId);
+            for (String link : linksOfChatId) {
                 linksList.append(link);
             }
             linkTrackerBot.sendMessage(chatId, "Ваши ссылки:\n" + linksList);
+        } catch (NullPointerException nullPointerException) {
+            linkTrackerBot.sendMessage(chatId, "Ссылки отсутствуют.");
+            log.warn(nullPointerException.getMessage());
         }
-
     }
 
     public void unknownCommand(Long chatId) {
@@ -82,21 +82,17 @@ public class LinkUpdateService {
     }
 
     public void updateLink(LinkUpdate linkUpdate) {
-        if (linkUpdate == null) {
-            return;
-        }
-
-        List<Long> chatIds = linkUpdate.tgChatIds();
-        if (chatIds == null || chatIds.isEmpty()) {
-            return;
-        }
-
-        for (Long chatId : linkUpdate.tgChatIds()) {
-            linkTrackerBot.sendMessage(chatId, """
-                Есть обновление на %s
-                %s
-                """.formatted(linkUpdate.url(), linkUpdate.description())
-            );
+        try {
+            List<Long> chatIds = linkUpdate.tgChatIds();
+            for (Long chatId : chatIds) {
+                linkTrackerBot.sendMessage(chatId, """
+                    Есть обновление на %s
+                    %s
+                    """.formatted(linkUpdate.url(), linkUpdate.description())
+                );
+            }
+        } catch (NullPointerException nullPointerException) {
+            log.error(nullPointerException.getMessage());
         }
     }
 }
