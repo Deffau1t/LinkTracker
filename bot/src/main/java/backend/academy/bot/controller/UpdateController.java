@@ -17,14 +17,12 @@ public class UpdateController {
 
     @PostMapping
     public ResponseEntity<?> postUpdate(@RequestBody LinkUpdate linkUpdate) {
-//        try {
-//            linkUpdateService.updateLink(linkUpdate);
-//            return ResponseEntity.ok().build();
-//        } catch (Exception e) {
-//            apiErrorResponse.exceptionName(e.getMessage());
-//            return ResponseEntity.badRequest().build();
-//        }
-//        linkUpdateService.updateLink(linkUpdate);
-        return ResponseEntity.ok().build();
+        try {
+            linkUpdateService.updateLink(linkUpdate);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            apiErrorResponse.exceptionName(e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

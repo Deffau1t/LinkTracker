@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import backend.academy.bot.model.LinkUpdate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -78,5 +79,24 @@ public class LinkUpdateService {
 
     public void unknownCommand(Long chatId) {
         linkTrackerBot.sendMessage(chatId, "Некорректная команда.");
+    }
+
+    public void updateLink(LinkUpdate linkUpdate) {
+        if (linkUpdate == null) {
+            return;
+        }
+
+        List<Long> chatIds = linkUpdate.tgChatIds();
+        if (chatIds == null || chatIds.isEmpty()) {
+            return;
+        }
+
+        for (Long chatId : linkUpdate.tgChatIds()) {
+            linkTrackerBot.sendMessage(chatId, """
+                Есть обновление на %s
+                %s
+                """.formatted(linkUpdate.url(), linkUpdate.description())
+            );
+        }
     }
 }
