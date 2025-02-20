@@ -1,5 +1,5 @@
 app:
-  github-token: ${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} # env variable
+  github-token: "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" # env variable
   stackoverflow:
     key: ${rl_MyaULbxY6yP8JivKmP5U8nTrd}
     access-token: ${SO_ACCESS_TOKEN}

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,8 @@ public class LinkUpdateService {
     @Autowired
     @Lazy
     private LinkTrackerBot linkTrackerBot;
+
+    @Getter
     private Map<Long, List<String>> chatSubscribes = new HashMap<>();;
 
     public void startCommand(Long chatId) {

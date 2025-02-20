@@ -22,7 +22,7 @@ public class UpdateController {
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             apiErrorResponse.exceptionName(e.getMessage());
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(apiErrorResponse);
         }
     }
 }
