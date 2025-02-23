@@ -1,23 +1,23 @@
 package backend.academy.scrapper.service;
 
-
-import backend.academy.bot.service.LinkUpdateService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class TgChatService {
 
-    @Autowired
-    @Lazy
-    private LinkUpdateService linkUpdateService;
+    private final Map<Long, Boolean> registeredChats = new ConcurrentHashMap<>();
 
     public boolean isChatsRegistered(Long chatId) {
-        return linkUpdateService.chatSubscribes().containsKey(chatId);
+        return registeredChats.containsKey(chatId);
+    }
+
+    public void registerChat(Long chatId) {
+        registeredChats.putIfAbsent(chatId, true);
     }
 
     public void deleteChat(Long chatId) {
-        linkUpdateService.chatSubscribes().remove(chatId);
+        registeredChats.remove(chatId);
     }
 }

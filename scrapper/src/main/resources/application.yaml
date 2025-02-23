@@ -1,8 +1,11 @@
 app:
-  github-token: "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" # env variable
+  githubApiUrl: https://api.github.com
+  stackoverflowApiUrl: https://api.stackexchange.com/2.3
+  github:
+    token: ${GITHUB_TOKEN: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}
   stackoverflow:
-    key: ${rl_MyaULbxY6yP8JivKmP5U8nTrd}
-    access-token: ${SO_ACCESS_TOKEN}
+    key: ${STACKOVERFLOW_KEY:rl_MyaULbxY6yP8JivKmP5U8nTrd}
+    access-token: ${STACKOVERFLOW_ACCESS_TOKEN}
 
 spring:
   application:
@@ -13,6 +16,13 @@ spring:
     hibernate:
       ddl-auto: validate
     open-in-view: false
+  mvc:
+    locale: ru_RU
+    http:
+      encoding:
+        charset: UTF-8
+        enabled: true
+        force: true
 
 server:
   port: 8081
