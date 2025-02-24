@@ -21,32 +21,32 @@ public class LinkTrackerBot {
         this.bot.setUpdatesListener(
             updates -> {
                 for (Update update : updates) {
-                    confirmUpdate(update);
+                    confirmUpdate(update, this);
                     }
                 return UpdatesListener.CONFIRMED_UPDATES_ALL;
             }
         );
     }
 
-    private void confirmUpdate(Update update) {
+    private void confirmUpdate(Update update, LinkTrackerBot linkTrackerBot) {
         if (update.message() != null && update.message().text() != null) {
             String text = update.message().text();
             Long chatId = update.message().chat().id();
 
             if (text.startsWith("/start")) {
-                linkUpdateService.startCommand(chatId);
+                linkUpdateService.startCommand(chatId, linkTrackerBot);
             } else if (text.startsWith("/help")) {
-                linkUpdateService.helpCommand(chatId);
+                linkUpdateService.helpCommand(chatId, linkTrackerBot);
             } else if (text.startsWith("/track")) {
                 String link = text.substring("/track".length()).trim();
-                linkUpdateService.trackCommand(chatId, link);
+                linkUpdateService.trackCommand(chatId, link, linkTrackerBot);
             } else if (text.startsWith("/untrack")) {
                 String link = text.substring("/untrack".length()).trim();
-                linkUpdateService.untrackCommand(chatId, link);
+                linkUpdateService.untrackCommand(chatId, link, linkTrackerBot);
             } else if (text.startsWith("/list")) {
-                linkUpdateService.listCommand(chatId);
+                linkUpdateService.listCommand(chatId, linkTrackerBot);
             } else {
-                linkUpdateService.unknownCommand(chatId);
+                linkUpdateService.unknownCommand(chatId, linkTrackerBot);
             }
         }
     }

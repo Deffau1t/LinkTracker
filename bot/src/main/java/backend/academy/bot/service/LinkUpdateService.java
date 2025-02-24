@@ -10,29 +10,23 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+@Getter
 @Service
 @RequiredArgsConstructor
 @Slf4j
 @AllArgsConstructor
-@Setter(onMethod_ = @Lazy)
+@Setter
 public class LinkUpdateService {
 
-    @Autowired
-    @Lazy
-    private LinkTrackerBot linkTrackerBot;
+    private Map<Long, List<String>> chatSubscribes = new HashMap<>();
 
-    @Getter
-    private Map<Long, List<String>> chatSubscribes = new HashMap<>();;
-
-    public void startCommand(Long chatId) {
+    public void startCommand(Long chatId, LinkTrackerBot linkTrackerBot) {
         linkTrackerBot.sendMessage(chatId, "Вы успешно зарегистрированы.");
     }
 
-    public void helpCommand(Long chatId) {
+    public void helpCommand(Long chatId, LinkTrackerBot linkTrackerBot) {
         String helpMessage = """
             /start - Начало работы бота
             /help - Все доступные команды бота
@@ -43,7 +37,7 @@ public class LinkUpdateService {
         linkTrackerBot.sendMessage(chatId, helpMessage);
     }
 
-    public void trackCommand(Long chatId, String link) {
+    public void trackCommand(Long chatId, String link, LinkTrackerBot linkTrackerBot) {
         if (link.isEmpty()) {
             linkTrackerBot.sendMessage(chatId, "Некорректная ссылка для добавления.");
         } else {
@@ -52,7 +46,7 @@ public class LinkUpdateService {
         }
     }
 
-    public void untrackCommand(Long chatId, String link) {
+    public void untrackCommand(Long chatId, String link, LinkTrackerBot linkTrackerBot) {
         try {
             List<String> links = chatSubscribes.get(chatId);
             boolean removed = links.remove(link);
@@ -70,7 +64,7 @@ public class LinkUpdateService {
         }
     }
 
-    public void listCommand(Long chatId) {
+    public void listCommand(Long chatId, LinkTrackerBot linkTrackerBot) {
         StringBuilder linksList = new StringBuilder();
         try {
             List<String> linksOfChatId = chatSubscribes.get(chatId);
@@ -84,11 +78,11 @@ public class LinkUpdateService {
         }
     }
 
-    public void unknownCommand(Long chatId) {
+    public void unknownCommand(Long chatId, LinkTrackerBot linkTrackerBot) {
         linkTrackerBot.sendMessage(chatId, "Некорректная команда.");
     }
 
-    public void updateLink(LinkUpdate linkUpdate) {
+    public void updateLink(LinkUpdate linkUpdate, LinkTrackerBot linkTrackerBot) {
         try {
             List<Long> chatIds = linkUpdate.tgChatIds();
             for (Long chatId : chatIds) {

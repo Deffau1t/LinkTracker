@@ -1,21 +1,25 @@
 package backend.academy.scrapper.service;
 
-import backend.academy.bot.service.LinkUpdateService;
+import backend.academy.scrapper.dto.LinkResponse;
 import backend.academy.scrapper.dto.RemoveLinkRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Service;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import org.springframework.stereotype.Service;
 
 @Service
 public class LinksService {
 
-    @Autowired
-    @Lazy
-    private LinkUpdateService linkUpdateService;
+    private Map<Long, List<String>> chatLinks = new HashMap<>();
+
+    public void addLinkOfChat(Long chatId, LinkResponse linkResponse) {
+        chatLinks.computeIfAbsent(chatId, _ -> new ArrayList<>()).add(linkResponse.url());
+    }
 
     public void deleteLinkOfChat(Long chatId, RemoveLinkRequest removeLinkRequest) {
-        List<String> links = linkUpdateService.chatSubscribes().get(chatId);
-        links.remove(removeLinkRequest.link());
+        if (chatLinks.containsKey(chatId)) {
+            chatLinks.get(chatId).remove(removeLinkRequest.link());
+        }
     }
 }

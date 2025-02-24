@@ -10,6 +10,7 @@ import backend.academy.scrapper.service.TgChatService;
 import java.util.Collections;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -49,8 +50,8 @@ public class LinksController {
         return ResponseEntity.ok(listLinksResponse);
     }
 
-    @PostMapping
-    public ResponseEntity<?> postUpdate(@RequestHeader("Tg-Chat-Id") Long chatId,
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> postUpdate(@RequestHeader("Tg-Chat-Id") Long chatId,
                                         @RequestBody AddLinkRequest addLinkRequest) {
 
         if (!tgChatService.isChatsRegistered(chatId)) {
@@ -68,6 +69,8 @@ public class LinksController {
                 .tags(addLinkRequest.tags() != null ? addLinkRequest.tags() : Collections.emptyList())
                 .filters(addLinkRequest.filters() != null ? addLinkRequest.filters() : Collections.emptyList())
                 .build();
+
+        linksService.addLinkOfChat(chatId, savedLink);
 
         return ResponseEntity.ok(savedLink);
     }
@@ -90,7 +93,7 @@ public class LinksController {
                 .description("Ссылка не найдена")
                 .exceptionName("Not Found")
                 .build();
-            return ResponseEntity.badRequest().body(apiErrorResponse);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiErrorResponse);
         }
 
         linksService.deleteLinkOfChat(chatId, removeLinkRequest);
