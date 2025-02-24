@@ -15,7 +15,7 @@ public class GitHubClient {
 
     @Autowired
     public GitHubClient(ScrapperConfig config) {
-        this.baseUrl = config.githubApiUrl(); // например, "https://api.github.com"
+        this.baseUrl = config.githubApiUrl();
         this.restTemplate = new RestTemplate();
     }
 
