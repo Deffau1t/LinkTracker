@@ -24,6 +24,7 @@ public class LinkUpdateService {
 
     public void startCommand(Long chatId, LinkTrackerBot linkTrackerBot) {
         linkTrackerBot.sendMessage(chatId, "Вы успешно зарегистрированы.");
+        chatSubscribes.put(chatId, new ArrayList<>());
     }
 
     public void helpCommand(Long chatId, LinkTrackerBot linkTrackerBot) {
@@ -86,11 +87,19 @@ public class LinkUpdateService {
         try {
             List<Long> chatIds = linkUpdate.tgChatIds();
             for (Long chatId : chatIds) {
-                linkTrackerBot.sendMessage(chatId, """
-                    Есть обновление на %s
-                    %s
-                    """.formatted(linkUpdate.url(), linkUpdate.description())
-                );
+                if (chatSubscribes.containsKey(chatId)) {
+                    List<String> linksOfChatId = chatSubscribes.get(chatId);
+                    if (linksOfChatId.contains(linkUpdate.url())) {
+                            linkTrackerBot.sendMessage(chatId, """
+                        Есть обновление на %s
+                        %s
+                        """.formatted(linkUpdate.url(), linkUpdate.description()));
+                    } else {
+                        log.warn("User with id {} is not subscribed on link {}", chatId, linkUpdate.url());
+                    }
+                } else {
+                    log.warn("User with id {} is not subscribed", chatId);
+                }
             }
         } catch (NullPointerException nullPointerException) {
             log.error(nullPointerException.getMessage());

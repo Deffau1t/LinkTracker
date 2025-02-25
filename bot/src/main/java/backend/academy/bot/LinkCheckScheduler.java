@@ -1,18 +1,20 @@
 //package backend.academy.bot;
 //
 //import backend.academy.bot.model.LinkUpdate;
+//import backend.academy.bot.service.LinkTrackerBot;
 //import backend.academy.bot.service.LinkUpdateService;
-//import backend.academy.scrapper.client.GitHubClient;
-//import backend.academy.scrapper.client.StackOverflowClient;
 //import lombok.AllArgsConstructor;
+//import lombok.extern.slf4j.Slf4j;
 //import org.springframework.scheduling.annotation.Scheduled;
 //import org.springframework.stereotype.Component;
 //
 //@Component
 //@AllArgsConstructor
+//@Slf4j
 //public class LinkCheckScheduler {
 //
 //    private final LinkUpdateService linkUpdateService;
+//    private final LinkTrackerBot linkTrackerBot;
 //
 //    @Scheduled(fixedRate = 60000)
 //    public void checkForUpdates() {
@@ -22,6 +24,7 @@
 //                .tgChatIds(linkUpdateService.chatSubscribes().keySet().stream().toList())
 //                .build();
 //
-//        linkUpdateService.updateLink(dummyUpdate);
+//         log.info("Запуск проверки обновлений...");
+//         linkUpdateService.updateLink(dummyUpdate, linkTrackerBot);
 //    }
 //}
