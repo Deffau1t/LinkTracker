@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Getter
 public class TgChatService {
 
+
     private final Map<Long, Boolean> registeredChats = new ConcurrentHashMap<>();
 
     public boolean isChatsRegistered(Long chatId) {
