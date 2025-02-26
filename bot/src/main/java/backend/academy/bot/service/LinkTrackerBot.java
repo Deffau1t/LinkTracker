@@ -1,58 +1,101 @@
 package backend.academy.bot.service;
 
 import backend.academy.bot.BotConfig;
+import backend.academy.bot.model.BotState;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Service
 public class LinkTrackerBot {
     private final TelegramBot bot;
     private final LinkUpdateService linkUpdateService;
+    private final Map<Long, BotState> userStates = new HashMap<>();
+    private final Map<Long, String> userLinks = new HashMap<>();
+    private final Map<Long, String> userTags = new HashMap<>();
 
     public LinkTrackerBot(BotConfig botConfig,
                           LinkUpdateService linkUpdateService) {
         this.linkUpdateService = linkUpdateService;
         this.bot = new TelegramBot(botConfig.telegramToken());
 
-
         this.bot.setUpdatesListener(
             updates -> {
                 for (Update update : updates) {
-                    confirmUpdate(update, this);
-                    }
+                    confirmUpdate(update);
+                }
                 return UpdatesListener.CONFIRMED_UPDATES_ALL;
             }
         );
     }
 
-    private void confirmUpdate(Update update, LinkTrackerBot linkTrackerBot) {
-        if (update.message() != null && update.message().text() != null) {
-            String text = update.message().text();
-            Long chatId = update.message().chat().id();
+    private void confirmUpdate(Update update) {
+        if (update.message() == null || update.message().text() == null) return;
 
-            if (text.startsWith("/start")) {
-                linkUpdateService.startCommand(chatId, linkTrackerBot);
-            } else if (text.startsWith("/help")) {
-                linkUpdateService.helpCommand(chatId, linkTrackerBot);
-            } else if (text.startsWith("/track")) {
-                String link = text.substring("/track".length()).trim();
-                linkUpdateService.trackCommand(chatId, link, linkTrackerBot);
-            } else if (text.startsWith("/untrack")) {
-                String link = text.substring("/untrack".length()).trim();
-                linkUpdateService.untrackCommand(chatId, link, linkTrackerBot);
-            } else if (text.startsWith("/list")) {
-                linkUpdateService.listCommand(chatId, linkTrackerBot);
-            } else {
-                linkUpdateService.unknownCommand(chatId, linkTrackerBot);
-            }
+        Long chatId = update.message().chat().id();
+        String text = update.message().text();
+
+        switch (userStates.getOrDefault(chatId, BotState.IDLE)) {
+            case IDLE -> handleCommand(chatId, text);
+            case WAITING_FOR_LINK -> handleLink(chatId, text);
+            case WAITING_FOR_TAGS -> handleTags(chatId, text);
+            case WAITING_FOR_FILTERS -> handleFilters(chatId, text);
+            case WAITING_FOR_UNTRACK -> handleUntrack(chatId, text);
         }
     }
 
+    private void handleCommand(Long chatId, String text) {
+        if (text.equals("/start")) {
+            linkUpdateService.startCommand(chatId, this);
+        } else if (text.equals("/help")) {
+            linkUpdateService.helpCommand(chatId, this);
+        } else if (text.equals("/track")) {
+            userStates.put(chatId, BotState.WAITING_FOR_LINK);
+            sendMessage(chatId, "Введите ссылку для отслеживания:");
+        } else if (text.equals("/untrack")) {
+            userStates.put(chatId, BotState.WAITING_FOR_UNTRACK);
+            sendMessage(chatId, "Введите ссылку для удаления:");
+        } else if (text.equals("/list")) {
+            linkUpdateService.listCommand(chatId, this);
+        } else {
+            linkUpdateService.unknownCommand(chatId, this);
+        }
+    }
+
+    private void handleLink(Long chatId, String text) {
+        userLinks.put(chatId, text);
+        userStates.put(chatId, BotState.WAITING_FOR_TAGS);
+        sendMessage(chatId, "Введите тэги (через пробел) или напишите `-`, чтобы пропустить:");
+    }
+
+    private void handleTags(Long chatId, String text) {
+        if (!text.equals("-")) {
+            userTags.put(chatId, text);
+        }
+        userStates.put(chatId, BotState.WAITING_FOR_FILTERS);
+        sendMessage(chatId, "Введите фильтры (через пробел) или напишите `-`, чтобы пропустить:");
+    }
+
+    private void handleFilters(Long chatId, String text) {
+        String link = userLinks.get(chatId);
+        String tags = userTags.getOrDefault(chatId, "");
+        String filters = text.equals("-") ? "" : text;
+
+        linkUpdateService.trackCommand(chatId, link, tags, filters, this);
+        userStates.put(chatId, BotState.IDLE);
+    }
+
+    private void handleUntrack(Long chatId, String text) {
+        linkUpdateService.untrackCommand(chatId, text, this);
+        userStates.put(chatId, BotState.IDLE);
+    }
+
     public void sendMessage(Long chatId, String text) {
-        SendMessage request = new SendMessage(chatId, text);
-        bot.execute(request);
+        bot.execute(new SendMessage(chatId, text));
     }
 }

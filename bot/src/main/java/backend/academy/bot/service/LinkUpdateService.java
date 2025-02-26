@@ -1,10 +1,8 @@
 package backend.academy.bot.service;
 
 import backend.academy.bot.model.LinkUpdate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import backend.academy.bot.model.TrackedLink;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +18,7 @@ import org.springframework.stereotype.Service;
 @Setter
 public class LinkUpdateService {
 
-    private Map<Long, List<String>> chatSubscribes = new HashMap<>();
+    private Map<Long, List<TrackedLink>> chatSubscribes = new HashMap<>();
 
     public void startCommand(Long chatId, LinkTrackerBot linkTrackerBot) {
         linkTrackerBot.sendMessage(chatId, "Вы успешно зарегистрированы.");
@@ -38,19 +36,20 @@ public class LinkUpdateService {
         linkTrackerBot.sendMessage(chatId, helpMessage);
     }
 
-    public void trackCommand(Long chatId, String link, LinkTrackerBot linkTrackerBot) {
+    public void trackCommand(Long chatId, String link, String tags, String filters, LinkTrackerBot linkTrackerBot) {
         if (link.isEmpty()) {
             linkTrackerBot.sendMessage(chatId, "Некорректная ссылка для добавления.");
         } else {
-            chatSubscribes.computeIfAbsent(chatId, _ -> new ArrayList<>()).add(link);
-            linkTrackerBot.sendMessage(chatId, "Ссылка успешно добавлена.");
+            chatSubscribes.computeIfAbsent(chatId, _ -> new ArrayList<>())
+                    .add(new TrackedLink(link, tags, filters));
+            linkTrackerBot.sendMessage(chatId, "Ссылка успешно добавлена с тэгами: " + tags + "\nФильтрами: " + filters);
         }
     }
 
     public void untrackCommand(Long chatId, String link, LinkTrackerBot linkTrackerBot) {
         try {
-            List<String> links = chatSubscribes.get(chatId);
-            boolean removed = links.remove(link);
+            List<TrackedLink> links = chatSubscribes.get(chatId);
+            boolean removed = links.removeIf(trackedLink -> trackedLink.url().equals(link));
             if (removed) {
                 linkTrackerBot.sendMessage(chatId, "Ссылка успешно удалена.");
             } else {
@@ -68,9 +67,9 @@ public class LinkUpdateService {
     public void listCommand(Long chatId, LinkTrackerBot linkTrackerBot) {
         StringBuilder linksList = new StringBuilder();
         try {
-            List<String> linksOfChatId = chatSubscribes.get(chatId);
-            for (String link : linksOfChatId) {
-                linksList.append(link);
+            List<TrackedLink> linksOfChatId = chatSubscribes.get(chatId);
+            for (TrackedLink trackedLink : linksOfChatId) {
+                linksList.append(trackedLink).append("\n");
             }
             linkTrackerBot.sendMessage(chatId, "Ваши ссылки:\n" + linksList);
         } catch (NullPointerException nullPointerException) {
@@ -88,9 +87,11 @@ public class LinkUpdateService {
             List<Long> chatIds = linkUpdate.tgChatIds();
             for (Long chatId : chatIds) {
                 if (chatSubscribes.containsKey(chatId)) {
-                    List<String> linksOfChatId = chatSubscribes.get(chatId);
-                    if (linksOfChatId.contains(linkUpdate.url())) {
-                            linkTrackerBot.sendMessage(chatId, """
+                    List<TrackedLink> linksOfChatId = chatSubscribes.get(chatId);
+                    boolean isSubscribed = linksOfChatId.stream()
+                            .anyMatch(trackedLink -> trackedLink.url().equals(linkUpdate.url()));
+                    if (isSubscribed) {
+                        linkTrackerBot.sendMessage(chatId, """
                         Есть обновление на %s
                         %s
                         """.formatted(linkUpdate.url(), linkUpdate.description()));
