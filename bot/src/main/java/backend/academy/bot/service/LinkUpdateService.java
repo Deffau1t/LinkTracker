@@ -106,4 +106,13 @@ public class LinkUpdateService {
             log.error(nullPointerException.getMessage());
         }
     }
+
+    public boolean isTrackingLink(Long chatId, String link) {
+        List<TrackedLink> links = chatSubscribes.get(chatId);
+        if (links == null) {
+            return false;
+        }
+        return links.stream().anyMatch(trackedLink -> trackedLink.url().equals(link));
+    }
+
 }

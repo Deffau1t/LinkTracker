@@ -1,6 +1,12 @@
 app:
   telegram-token: "7857432014:AAHu9nrNT7-ywrewhNmd-ba9FtmxRYiEcw8" # env variable
 
+scrapper:
+  base-url: http://localhost:8081
+
+bot:
+  base-url: http://localhost:8080
+
 spring:
   application:
     name: DMLinkUpdateBot

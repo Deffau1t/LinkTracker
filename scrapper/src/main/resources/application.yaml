@@ -1,11 +1,14 @@
 app:
-  githubApiUrl: https://api.github.com
-  stackoverflowApiUrl: https://api.stackexchange.com/2.3
+  github-api-url: https://api.github.com
+  stackoverflow-api-url: https://api.stackexchange.com/2.3
   github:
-    token: ${GITHUB_TOKEN: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}
-  stackoverflow:
-    key: ${STACKOVERFLOW_KEY:rl_MyaULbxY6yP8JivKmP5U8nTrd}
-    access-token: ${STACKOVERFLOW_ACCESS_TOKEN}
+    token: YOUR_GITHUB_TOKEN
+  stackOverflow:
+    key: YOUR_STACKOVERFLOW_KEY
+    accessToken: YOUR_STACKOVERFLOW_ACCESS_TOKEN
+
+bot:
+  base-url: http://localhost:8081
 
 spring:
   application:

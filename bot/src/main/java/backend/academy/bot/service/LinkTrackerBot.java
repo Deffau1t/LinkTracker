@@ -1,13 +1,16 @@
 package backend.academy.bot.service;
 
 import backend.academy.bot.BotConfig;
+import backend.academy.bot.client.ScrapperClient;
 import backend.academy.bot.model.BotState;
+import backend.academy.bot.model.TrackedLink;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,10 +21,13 @@ public class LinkTrackerBot {
     private final Map<Long, BotState> userStates = new HashMap<>();
     private final Map<Long, String> userLinks = new HashMap<>();
     private final Map<Long, String> userTags = new HashMap<>();
+    private final ScrapperClient scrapperClient;
 
     public LinkTrackerBot(BotConfig botConfig,
-                          LinkUpdateService linkUpdateService) {
+                          LinkUpdateService linkUpdateService,
+                          ScrapperClient scrapperClient) {
         this.linkUpdateService = linkUpdateService;
+        this.scrapperClient = scrapperClient;
         this.bot = new TelegramBot(botConfig.telegramToken());
 
         this.bot.setUpdatesListener(
@@ -70,8 +76,23 @@ public class LinkTrackerBot {
     private void handleLink(Long chatId, String text) {
         userLinks.put(chatId, text);
         userStates.put(chatId, BotState.WAITING_FOR_TAGS);
-        sendMessage(chatId, "Введите тэги (через пробел) или напишите `-`, чтобы пропустить:");
+        sendMessage(chatId, "Введите фильтры (через пробел) или напишите `-`, чтобы пропустить:");
     }
+
+    private void handleUntrack(Long chatId, String text) {
+        if (!linkUpdateService.isTrackingLink(chatId, text)) {
+            sendMessage(chatId, "Вы не отслеживаете эту ссылку.");
+            userStates.put(chatId, BotState.IDLE);
+            return;
+        }
+
+        scrapperClient.untrackLink(chatId, text);
+
+        linkUpdateService.untrackCommand(chatId, text, this);
+
+        userStates.put(chatId, BotState.IDLE);
+    }
+
 
     private void handleTags(Long chatId, String text) {
         if (!text.equals("-")) {
@@ -86,14 +107,13 @@ public class LinkTrackerBot {
         String tags = userTags.getOrDefault(chatId, "");
         String filters = text.equals("-") ? "" : text;
 
+        scrapperClient.trackLink(chatId, link, tags, filters);
+
         linkUpdateService.trackCommand(chatId, link, tags, filters, this);
+
         userStates.put(chatId, BotState.IDLE);
     }
 
-    private void handleUntrack(Long chatId, String text) {
-        linkUpdateService.untrackCommand(chatId, text, this);
-        userStates.put(chatId, BotState.IDLE);
-    }
 
     public void sendMessage(Long chatId, String text) {
         bot.execute(new SendMessage(chatId, text));

@@ -1,36 +1,28 @@
 package backend.academy.scrapper.client;
 
+
 import backend.academy.scrapper.ScrapperConfig;
-import backend.academy.scrapper.model.StackOverflowQuestionList;
-import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import backend.academy.scrapper.dto.StackOverflowQuestionResponse;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 @Component
 public class StackOverflowClient {
 
-    private final String baseUrl;
-    private final RestTemplate restTemplate;
+    private final WebClient webClient;
 
-    @Autowired
-    public StackOverflowClient(ScrapperConfig config) {
-        this.baseUrl = config.stackoverflowApiUrl();
-        this.restTemplate = new RestTemplate();
+    public StackOverflowClient(ScrapperConfig scrapperConfig) {
+        this.webClient = WebClient.builder()
+                .baseUrl(scrapperConfig.stackoverflowApiUrl())
+                .defaultHeader("Accept", "application/json")
+                .build();
     }
 
-    /**
-     * Запрашивает список вопросов с указанным тегом.
-     */
-    public StackOverflowQuestionList getQuestions(String tag) {
-        String url = UriComponentsBuilder.fromHttpUrl(baseUrl)
-                .pathSegment("questions")
-                .queryParam("order", "desc")
-                .queryParam("sort", "activity")
-                .queryParam("tagged", tag)
-                .queryParam("site", "stackoverflow")
-                .build().toUriString();
-        return restTemplate.getForObject(url, StackOverflowQuestionList.class);
+    public Mono<StackOverflowQuestionResponse> fetchQuestionInfo(Long questionId) {
+        return webClient.get()
+                .uri("/questions/{questionId}?site=stackoverflow", questionId)
+                .retrieve()
+                .bodyToMono(StackOverflowQuestionResponse.class);
     }
 }
