@@ -4,35 +4,35 @@ import backend.academy.scrapper.client.GitHubClient;
 import backend.academy.scrapper.client.StackOverflowClient;
 import backend.academy.scrapper.dto.LinkResponse;
 import backend.academy.scrapper.dto.RemoveLinkRequest;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class LinksService {
 
-    private final Map<Long, List<String>> chatLinks = new HashMap<>();
+    private final Map<String, List<Long>> trackedLinks = new HashMap<>();
     private final GitHubClient gitHubClient;
     private final StackOverflowClient stackOverflowClient;
 
     public void addLinkOfChat(Long chatId, LinkResponse linkResponse) {
-        chatLinks.computeIfAbsent(chatId, _ -> new ArrayList<>()).add(linkResponse.url());
+        trackedLinks.computeIfAbsent(linkResponse.url(), _ -> new ArrayList<>()).add(chatId);
         checkLinkForUpdates(linkResponse.url());
     }
 
     public void deleteLinkOfChat(Long chatId, RemoveLinkRequest removeLinkRequest) {
-        if (chatLinks.containsKey(chatId)) {
-            chatLinks.get(chatId).remove(removeLinkRequest.link());
+        trackedLinks.getOrDefault(removeLinkRequest.link(), new ArrayList<>()).remove(chatId);
+        if (trackedLinks.getOrDefault(removeLinkRequest.link(), List.of()).isEmpty()) {
+            trackedLinks.remove(removeLinkRequest.link());
         }
     }
 
@@ -75,8 +75,15 @@ public class LinksService {
                     .subscribe(response -> {
                         log.info("StackOverflow question {} last activity at: {}",
                             response.questionId(), response.lastActivityDate());
-                        // Здесь можно добавить логику для уведомления пользователя
                     }, error -> log.error("Error fetching StackOverflow question info: {}", error.getMessage()));
         }
+    }
+
+    public Set<String> getAllTrackedLinks() {
+        return trackedLinks.keySet();
+    }
+
+    public List<Long> getChatIdsForLink(String link) {
+        return trackedLinks.getOrDefault(link, List.of());
     }
 }

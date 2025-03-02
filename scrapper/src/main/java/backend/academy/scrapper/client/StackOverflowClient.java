@@ -1,12 +1,13 @@
 package backend.academy.scrapper.client;
 
-
 import backend.academy.scrapper.ScrapperConfig;
 import backend.academy.scrapper.dto.StackOverflowQuestionResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @Component
 public class StackOverflowClient {
 
@@ -23,6 +24,7 @@ public class StackOverflowClient {
         return webClient.get()
                 .uri("/questions/{questionId}?site=stackoverflow", questionId)
                 .retrieve()
-                .bodyToMono(StackOverflowQuestionResponse.class);
+                .bodyToMono(StackOverflowQuestionResponse.class)
+                .doOnError(e -> log.error("Ошибка при запросе к StackOverflow API: {}", e.getMessage()));
     }
 }

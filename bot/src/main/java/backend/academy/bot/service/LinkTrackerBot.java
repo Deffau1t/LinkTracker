@@ -3,16 +3,13 @@ package backend.academy.bot.service;
 import backend.academy.bot.BotConfig;
 import backend.academy.bot.client.ScrapperClient;
 import backend.academy.bot.model.BotState;
-import backend.academy.bot.model.TrackedLink;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.stereotype.Service;
 
 @Service
 public class LinkTrackerBot {

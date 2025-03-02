@@ -2,13 +2,13 @@ app:
   github-api-url: https://api.github.com
   stackoverflow-api-url: https://api.stackexchange.com/2.3
   github:
-    token: YOUR_GITHUB_TOKEN
+    token: "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"
   stackOverflow:
     key: YOUR_STACKOVERFLOW_KEY
     accessToken: YOUR_STACKOVERFLOW_ACCESS_TOKEN
 
 bot:
-  base-url: http://localhost:8081
+  base-url: http://localhost:8080
 
 spring:
   application:

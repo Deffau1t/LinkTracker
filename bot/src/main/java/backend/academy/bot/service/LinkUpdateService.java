@@ -2,6 +2,7 @@ package backend.academy.bot.service;
 
 import backend.academy.bot.model.LinkUpdate;
 import java.util.*;
+import java.util.stream.Collectors;
 import backend.academy.bot.model.TrackedLink;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,11 +28,11 @@ public class LinkUpdateService {
 
     public void helpCommand(Long chatId, LinkTrackerBot linkTrackerBot) {
         String helpMessage = """
-            /start - Начало работы бота
-            /help - Все доступные команды бота
-            /track - Подписаться на какой-то источник
-            /untrack - Отписаться от какого-то источника
-            /list - Показать все отслеживаемые источники
+            /start - регистрация пользователя.
+            /help - вывод списка доступных команд.
+            /track - начать отслеживание ссылки.
+            /untrack - прекратить отслеживание ссылки.
+            /list - показать список отслеживаемых ссылок.
             """;
         linkTrackerBot.sendMessage(chatId, helpMessage);
     }
@@ -84,26 +85,30 @@ public class LinkUpdateService {
 
     public void updateLink(LinkUpdate linkUpdate, LinkTrackerBot linkTrackerBot) {
         try {
-            List<Long> chatIds = linkUpdate.tgChatIds();
-            for (Long chatId : chatIds) {
-                if (chatSubscribes.containsKey(chatId)) {
-                    List<TrackedLink> linksOfChatId = chatSubscribes.get(chatId);
-                    boolean isSubscribed = linksOfChatId.stream()
-                            .anyMatch(trackedLink -> trackedLink.url().equals(linkUpdate.url()));
-                    if (isSubscribed) {
-                        linkTrackerBot.sendMessage(chatId, """
-                        Есть обновление на %s
-                        %s
-                        """.formatted(linkUpdate.url(), linkUpdate.description()));
-                    } else {
-                        log.warn("User with id {} is not subscribed on link {}", chatId, linkUpdate.url());
-                    }
+            if (linkUpdate == null || linkUpdate.tgChatIds() == null) {
+                log.warn("Получено некорректное обновление: {}", linkUpdate);
+                return;
+            }
+
+            for (Long chatId : linkUpdate.tgChatIds()) {
+                List<TrackedLink> linksOfChatId = chatSubscribes.get(chatId);
+                if (linksOfChatId == null || linksOfChatId.isEmpty()) {
+                    log.warn("Пользователь {} не подписан ни на одну ссылку", chatId);
+                    continue;
+                }
+
+                boolean isSubscribed = linksOfChatId.stream()
+                        .anyMatch(trackedLink -> trackedLink.url().equals(linkUpdate.url()));
+
+                if (isSubscribed) {
+                    linkTrackerBot.sendMessage(chatId,
+                        "\uD83D\uDD14 Обновление на " + linkUpdate.url() + "\n" + linkUpdate.description());
                 } else {
-                    log.warn("User with id {} is not subscribed", chatId);
+                    log.warn("Пользователь {} не подписан на ссылку {}", chatId, linkUpdate.url());
                 }
             }
-        } catch (NullPointerException nullPointerException) {
-            log.error(nullPointerException.getMessage());
+        } catch (Exception e) {
+            log.error("Ошибка при обработке обновления: {}", e.getMessage());
         }
     }
 
@@ -114,5 +119,13 @@ public class LinkUpdateService {
         }
         return links.stream().anyMatch(trackedLink -> trackedLink.url().equals(link));
     }
+
+    public Set<String> getAllTrackedLinks() {
+        return chatSubscribes.values().stream()
+            .flatMap(List::stream)
+            .map(TrackedLink::url)
+            .collect(Collectors.toSet());
+    }
+
 
 }
