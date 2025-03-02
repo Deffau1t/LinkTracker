@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import backend.academy.scrapper.repository.LinkTrackingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,20 +21,17 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class LinksService {
 
-    private final Map<String, List<Long>> trackedLinks = new HashMap<>();
     private final GitHubClient gitHubClient;
     private final StackOverflowClient stackOverflowClient;
+    private final LinkTrackingRepository linkTrackingRepository;
 
     public void addLinkOfChat(Long chatId, LinkResponse linkResponse) {
-        trackedLinks.computeIfAbsent(linkResponse.url(), _ -> new ArrayList<>()).add(chatId);
+        linkTrackingRepository.trackLink(chatId, linkResponse.url());
         checkLinkForUpdates(linkResponse.url());
     }
 
     public void deleteLinkOfChat(Long chatId, RemoveLinkRequest removeLinkRequest) {
-        trackedLinks.getOrDefault(removeLinkRequest.link(), new ArrayList<>()).remove(chatId);
-        if (trackedLinks.getOrDefault(removeLinkRequest.link(), List.of()).isEmpty()) {
-            trackedLinks.remove(removeLinkRequest.link());
-        }
+        linkTrackingRepository.untrackLink(chatId, removeLinkRequest.link());
     }
 
     private void checkLinkForUpdates(String url) {
@@ -52,7 +50,7 @@ public class LinksService {
         return url.contains("stackoverflow.com");
     }
 
-    private void fetchGitHubUpdates(String url) {
+    public void fetchGitHubUpdates(String url) {
         Pattern pattern = Pattern.compile("https://github.com/([^/]+)/([^/]+)");
         Matcher matcher = pattern.matcher(url);
         if (matcher.find()) {
@@ -66,7 +64,7 @@ public class LinksService {
         }
     }
 
-    private void fetchStackOverflowUpdates(String url) {
+    public void fetchStackOverflowUpdates(String url) {
         Pattern pattern = Pattern.compile("https://stackoverflow.com/questions/(\\d+)");
         Matcher matcher = pattern.matcher(url);
         if (matcher.find()) {
@@ -77,13 +75,5 @@ public class LinksService {
                             response.questionId(), response.lastActivityDate());
                     }, error -> log.error("Error fetching StackOverflow question info: {}", error.getMessage()));
         }
-    }
-
-    public Set<String> getAllTrackedLinks() {
-        return trackedLinks.keySet();
-    }
-
-    public List<Long> getChatIdsForLink(String link) {
-        return trackedLinks.getOrDefault(link, List.of());
     }
 }

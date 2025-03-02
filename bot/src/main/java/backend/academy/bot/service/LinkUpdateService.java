@@ -41,6 +41,15 @@ public class LinkUpdateService {
         if (link.isEmpty()) {
             linkTrackerBot.sendMessage(chatId, "Некорректная ссылка для добавления.");
         } else {
+            if (chatSubscribes.get(chatId) != null){
+                List<TrackedLink> trackedLinks = chatSubscribes.get(chatId);
+                for (TrackedLink trackedLink : trackedLinks) {
+                    if (trackedLink.url().equals(link)) {
+                        linkTrackerBot.sendMessage(chatId, "Вы уже подписаны на эту ссылку.");
+                        return;
+                    }
+                }
+            }
             chatSubscribes.computeIfAbsent(chatId, _ -> new ArrayList<>())
                     .add(new TrackedLink(link, tags, filters));
             linkTrackerBot.sendMessage(chatId, "Ссылка успешно добавлена с тэгами: " + tags + "\nФильтрами: " + filters);

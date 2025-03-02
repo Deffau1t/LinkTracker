@@ -5,6 +5,7 @@ import backend.academy.scrapper.client.StackOverflowClient;
 import backend.academy.scrapper.dto.GitHubRepositoryResponse;
 import backend.academy.scrapper.dto.LinkUpdate;
 import backend.academy.scrapper.dto.StackOverflowQuestionResponse;
+import backend.academy.scrapper.repository.LinkTrackingRepository;
 import backend.academy.scrapper.service.BotClient;
 import backend.academy.scrapper.service.LinksService;
 import lombok.RequiredArgsConstructor;
@@ -23,13 +24,13 @@ public class LinkCheckScheduler {
     private final GitHubClient gitHubClient;
     private final StackOverflowClient stackOverflowClient;
     private final BotClient botClient;
-    private final LinksService linksService;
+    private final LinkTrackingRepository linkTrackingRepository;
 
     @Scheduled(fixedRate = 60000)
     public void checkForUpdates() {
         log.info("Запуск проверки обновлений...");
 
-        Set<String> trackedLinks = linksService.getAllTrackedLinks();
+        Set<String> trackedLinks = linkTrackingRepository.getAllTrackedLinks();
 
         for (String link : trackedLinks) {
             if (link.contains("github.com")) {
@@ -68,7 +69,7 @@ public class LinkCheckScheduler {
     }
 
     private void sendUpdate(String url, String description) {
-        List<Long> chatIds = linksService.getChatIdsForLink(url);
+        List<Long> chatIds = linkTrackingRepository.getChatIdsForLink(url);
         if (!chatIds.isEmpty()) {
             botClient.sendUpdate(LinkUpdate.builder()
                     .url(url)
