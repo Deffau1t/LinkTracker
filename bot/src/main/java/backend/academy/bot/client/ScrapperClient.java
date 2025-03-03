@@ -19,11 +19,21 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 public class ScrapperClient {
 
+    /**
+     * restTemplate - RestTemplate для отправки HTTP запросов.
+     */
     private final RestTemplate restTemplate;
 
+    /**
+     * scrapperBaseUrl - Базовый URL для взаимодействия с scrapper.
+     */
     @Value("${scrapper.base-url}")
     private String scrapperBaseUrl;
 
+    /**
+     * Конструктор класса ScrapperClient.
+     * @param restTemplate - RestTemplate для отправки HTTP запросов.
+     */
     @Autowired
     public ScrapperClient(final RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
@@ -72,11 +82,12 @@ public class ScrapperClient {
     }
 
     /**
-     * registerChatIfNeeded - Регистрирует чат в scrapper, если он еще не зарегистрирован.
+     * registerChatIfNeeded - Регистрирует чат в scrapper,
+     * если он еще не зарегистрирован.
      * @param chatId - ID чата в Telegram.
      */
 
-    private void registerChatIfNeeded(Long chatId) {
+    private void registerChatIfNeeded(final Long chatId) {
         String url = scrapperBaseUrl + "/tg-chat/" + chatId;
 
         try {

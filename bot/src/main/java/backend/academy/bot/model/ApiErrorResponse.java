@@ -13,8 +13,23 @@ import lombok.Setter;
 @Setter
 @Builder
 public class ApiErrorResponse {
+    /**
+     * Описание ошибки.
+     */
     private String description;
+
+    /**
+     * Код ошибки.
+     */
     private String code;
+
+    /**
+     * Имя исключения.
+     */
     private String exceptionName;
+
+    /**
+     * Стек трассировки ошибки.
+     */
     private List<String> stacktrace;
 }

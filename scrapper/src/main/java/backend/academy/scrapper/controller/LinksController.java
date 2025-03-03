@@ -21,18 +21,35 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * LinksController - контроллер для работы со ссылками.
+ */
+
 @RestController
 @RequestMapping(value = "/links", produces = MediaType.APPLICATION_JSON_VALUE)
 public class LinksController {
 
+    /**
+     * TgChatService - сервис для работы с чатами.
+     */
     @Autowired
     private TgChatService tgChatService;
 
+    /**
+     * LinksService - сервис для работы со ссылками.
+     */
     @Autowired
     private LinksService linksService;
 
+    /**
+     * Метод для получения списка ссылок.
+     *
+     * @param chatId - идентификатор чата.
+     * @return - список ссылок.
+     */
     @GetMapping
-    public ResponseEntity<?> getLinks(@RequestHeader("Tg-Chat-Id") Long chatId) {
+    public ResponseEntity<?> getLinks(
+        final @RequestHeader("Tg-Chat-Id") Long chatId) {
         if (!tgChatService.isChatsRegistered(chatId)) {
             ApiErrorResponse apiErrorResponse = ApiErrorResponse.builder()
                 .code("400")
@@ -50,9 +67,17 @@ public class LinksController {
         return ResponseEntity.ok(listLinksResponse);
     }
 
+    /**
+     * Метод для добавления ссылки.
+     *
+     * @param chatId - идентификатор чата.
+     * @param addLinkRequest - запрос на добавление ссылки.
+     * @return - добавленная ссылка.
+     */
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> postUpdate(@RequestHeader("Tg-Chat-Id") Long chatId,
-                                        @RequestBody AddLinkRequest addLinkRequest) {
+    public ResponseEntity<Object> postUpdate(
+        final @RequestHeader("Tg-Chat-Id") Long chatId,
+        final @RequestBody AddLinkRequest addLinkRequest) {
 
         if (!tgChatService.isChatsRegistered(chatId)) {
             ApiErrorResponse apiErrorResponse = ApiErrorResponse.builder()
@@ -66,8 +91,10 @@ public class LinksController {
         LinkResponse savedLink = LinkResponse.builder()
                 .id(chatId)
                 .url(addLinkRequest.link())
-                .tags(addLinkRequest.tags() != null ? addLinkRequest.tags() : Collections.emptyList())
-                .filters(addLinkRequest.filters() != null ? addLinkRequest.filters() : Collections.emptyList())
+                .tags(addLinkRequest.tags() != null
+                    ? addLinkRequest.tags() : Collections.emptyList())
+                .filters(addLinkRequest.filters() != null
+                    ? addLinkRequest.filters() : Collections.emptyList())
                 .build();
 
         linksService.addLinkOfChat(chatId, savedLink);
@@ -75,9 +102,16 @@ public class LinksController {
         return ResponseEntity.ok(savedLink);
     }
 
+    /**
+     * Метод для удаления ссылки.
+     * @param chatId - идентификатор чата.
+     * @param removeLinkRequest - запрос на удаление ссылки.
+     * @return - удаленная ссылка.
+     */
     @DeleteMapping
-    public ResponseEntity<?> deleteUpdate(@RequestHeader("Tg-Chat-Id") Long chatId,
-                                          @RequestBody RemoveLinkRequest removeLinkRequest) {
+    public ResponseEntity<?> deleteUpdate(
+        final @RequestHeader("Tg-Chat-Id") Long chatId,
+        final @RequestBody RemoveLinkRequest removeLinkRequest) {
         if (chatId == null || chatId < 0) {
             ApiErrorResponse apiErrorResponse = ApiErrorResponse.builder()
                 .code("400")
@@ -87,13 +121,15 @@ public class LinksController {
             return ResponseEntity.badRequest().body(apiErrorResponse);
         }
 
-        if (!tgChatService.isChatsRegistered(chatId)){
+        if (!tgChatService.isChatsRegistered(chatId)) {
             ApiErrorResponse apiErrorResponse = ApiErrorResponse.builder()
                 .code("404")
                 .description("Ссылка не найдена")
                 .exceptionName("Not Found")
                 .build();
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiErrorResponse);
+            return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(apiErrorResponse);
         }
 
         linksService.deleteLinkOfChat(chatId, removeLinkRequest);

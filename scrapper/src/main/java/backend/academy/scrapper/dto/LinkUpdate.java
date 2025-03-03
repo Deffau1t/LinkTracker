@@ -8,6 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * LinkUpdate - дто для обновления ссылки.
+ */
 
 @Getter
 @Setter
@@ -15,15 +18,28 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class LinkUpdate {
+    /**
+     * Id - идентификатор ссылки.
+     */
     @JsonProperty("id")
     private Long id;
 
+    /**
+     * url - ссылка.
+     */
     @JsonProperty("url")
     private String url;
 
+    /**
+     * description - описание ссылки.
+     */
     @JsonProperty("description")
     private String description;
 
+    /**
+     * tgChatIds - список идентификаторов чатов Telegram,
+     * которые отслеживают эту ссылку.
+     */
     @JsonProperty("tgChatIds")
     private List<Long> tgChatIds;
 }

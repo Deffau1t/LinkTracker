@@ -5,9 +5,28 @@ package backend.academy.bot.model;
  */
 
 public enum BotState {
+    /**
+     * Бот находится в состоянии ожидания.
+     */
     IDLE,
+
+    /**
+     * Бот ожидает ссылку.
+     */
     WAITING_FOR_LINK,
+
+    /**
+     * Бот ожидает теги.
+     */
     WAITING_FOR_TAGS,
+
+    /**
+     * Бот ожидает фильтры.
+     */
     WAITING_FOR_FILTERS,
-    WAITING_FOR_UNTRACK
+
+    /**
+     * Бот ожидает отписку.
+     */
+    WAITING_FOR_UNTRACK;
 }

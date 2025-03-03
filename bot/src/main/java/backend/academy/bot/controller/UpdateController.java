@@ -21,20 +21,32 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/updates")
 @RequiredArgsConstructor
 public class UpdateController {
+    /**
+     * LinkUpdateService - объект сервиса для обработки обновлений ссылок.
+     */
     private final LinkUpdateService linkUpdateService;
+
+    /**
+     * LinkTrackerBot - объект бота для обработки обновлений ссылок.
+     */
     private final LinkTrackerBot linkTrackerBot;
 
     /**
-     * Обрабатывает POST-запрос на адрес /updates с телом в виде объекта LinkUpdate.
-     * Вызывает метод updateLink из сервиса LinkUpdateService для обработки обновления ссылки.
+     * Обрабатывает POST-запрос на адрес /updates
+     * с телом в виде объекта LinkUpdate.
+     * Вызывает метод updateLink из сервиса LinkUpdateService
+     * для обработки обновления ссылки.
      *
-     * @param linkUpdate Объект LinkUpdate, содержащий информацию о ссылке и ее обновлении.
-     * @return ResponseEntity с кодом 200 в случае успешной обработки обновления, или ResponseEntity с кодом 400 и
-     * объектом ApiErrorResponse в случае ошибки.
+     * @param linkUpdate Объект LinkUpdate,
+     *                  содержащий информацию о ссылке и ее обновлении.
+     * @return ResponseEntity с кодом 200 в случае успешной обработки,
+     * или ResponseEntity с кодом 400 и ApiErrorResponse в случае ошибки.
      */
 
     @PostMapping
-    public ResponseEntity<?> postUpdate(@RequestBody LinkUpdate linkUpdate) {
+    public ResponseEntity<?> postUpdate(
+        final @RequestBody LinkUpdate linkUpdate
+    ) {
         try {
             log.info("Получено обновление: {}", linkUpdate);
             linkUpdateService.updateLink(linkUpdate, linkTrackerBot);

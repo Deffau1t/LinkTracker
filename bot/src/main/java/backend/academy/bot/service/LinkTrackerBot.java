@@ -17,11 +17,34 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class LinkTrackerBot {
+    /**
+     * Бот Telegram.
+     */
     private final TelegramBot bot;
+
+    /**
+     * Сервис обновления ссылок.
+     */
     private final LinkUpdateService linkUpdateService;
+
+    /**
+     * Состояния пользователей.
+     */
     private final Map<Long, BotState> userStates = new HashMap<>();
+
+    /**
+     * Ссылки пользователей.
+     */
     private final Map<Long, String> userLinks = new HashMap<>();
+
+    /**
+     * Теги пользователей.
+     */
     private final Map<Long, String> userTags = new HashMap<>();
+
+    /**
+     * Клиент скраппера.
+     */
     private final ScrapperClient scrapperClient;
 
     /**
@@ -31,9 +54,9 @@ public class LinkTrackerBot {
      * @param scrapperClient - клиент для получения данных с сайта.
      */
 
-    public LinkTrackerBot(BotConfig botConfig,
-                          LinkUpdateService linkUpdateService,
-                          ScrapperClient scrapperClient) {
+    public LinkTrackerBot(final BotConfig botConfig,
+                          final LinkUpdateService linkUpdateService,
+                          final ScrapperClient scrapperClient) {
         this.linkUpdateService = linkUpdateService;
         this.scrapperClient = scrapperClient;
         this.bot = new TelegramBot(botConfig.telegramToken());
@@ -53,8 +76,10 @@ public class LinkTrackerBot {
      * @param update - обновление от Telegram.
      */
 
-    private void confirmUpdate(Update update) {
-        if (update.message() == null || update.message().text() == null) return;
+    private void confirmUpdate(final Update update) {
+        if (update.message() == null || update.message().text() == null) {
+            return;
+        }
 
         Long chatId = update.message().chat().id();
         String text = update.message().text();
@@ -65,6 +90,7 @@ public class LinkTrackerBot {
             case WAITING_FOR_TAGS -> handleTags(chatId, text);
             case WAITING_FOR_FILTERS -> handleFilters(chatId, text);
             case WAITING_FOR_UNTRACK -> handleUntrack(chatId, text);
+            default -> linkUpdateService.unknownCommand(chatId, this);
         }
     }
 
@@ -74,7 +100,7 @@ public class LinkTrackerBot {
      * @param text - текст сообщения.
      */
 
-    private void handleCommand(Long chatId, String text) {
+    private void handleCommand(final Long chatId, final String text) {
         if (text.equals("/start")) {
             linkUpdateService.startCommand(chatId, this);
         } else if (text.equals("/help")) {
@@ -92,13 +118,16 @@ public class LinkTrackerBot {
         }
     }
 
-    private void handleLink(Long chatId, String text) {
+    private void handleLink(final Long chatId, final String text) {
         userLinks.put(chatId, text);
         userStates.put(chatId, BotState.WAITING_FOR_TAGS);
-        sendMessage(chatId, "Введите фильтры (через пробел) или напишите `-`, чтобы пропустить:");
+        sendMessage(
+            chatId,
+            "Введите фильтры через пробел(напишите `-`, чтобы пропустить):"
+        );
     }
 
-    private void handleUntrack(Long chatId, String text) {
+    private void handleUntrack(final Long chatId, final String text) {
         if (!linkUpdateService.isTrackingLink(chatId, text)) {
             sendMessage(chatId, "Вы не отслеживаете эту ссылку.");
             userStates.put(chatId, BotState.IDLE);
@@ -113,15 +142,18 @@ public class LinkTrackerBot {
     }
 
 
-    private void handleTags(Long chatId, String text) {
+    private void handleTags(final Long chatId, final String text) {
         if (!text.equals("-")) {
             userTags.put(chatId, text);
         }
         userStates.put(chatId, BotState.WAITING_FOR_FILTERS);
-        sendMessage(chatId, "Введите фильтры (через пробел) или напишите `-`, чтобы пропустить:");
+        sendMessage(
+            chatId,
+            "Введите фильтры через пробел(напишите `-`, чтобы пропустить):"
+        );
     }
 
-    private void handleFilters(Long chatId, String text) {
+    private void handleFilters(final Long chatId, final String text) {
         String link = userLinks.get(chatId);
         String tags = userTags.getOrDefault(chatId, "");
         String filters = text.equals("-") ? "" : text;
@@ -133,8 +165,12 @@ public class LinkTrackerBot {
         userStates.put(chatId, BotState.IDLE);
     }
 
-
-    public void sendMessage(Long chatId, String text) {
+    /**
+     * sendMessage - метод, который отправляет сообщение пользователю.
+     * @param chatId - идентификатор чата.
+     * @param text - текст сообщения.
+     */
+    public void sendMessage(final Long chatId, final String text) {
         bot.execute(new SendMessage(chatId, text));
     }
 }

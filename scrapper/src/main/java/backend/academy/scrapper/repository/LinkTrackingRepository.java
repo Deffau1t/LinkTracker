@@ -7,26 +7,54 @@ import java.util.Map;
 import java.util.Set;
 import org.springframework.stereotype.Repository;
 
+/**
+ * LinkTrackingRepository - класс для отслеживания ссылок пользователей.
+ */
+
 @Repository
 public class LinkTrackingRepository {
+    /**
+     * trackedLinks - отслеживаемые ссылки пользователей.
+     */
     private final Map<String, List<Long>> trackedLinks = new HashMap<>();
 
-    public void trackLink(Long chatId, String link) {
-        trackedLinks.computeIfAbsent(link, _ -> new ArrayList<>()).add(chatId);
+    /**
+     * trackLink - метод для отслеживания ссылок пользователей.
+     * @param chatId - id чата
+     * @param link - ссылка
+     */
+    public void trackLink(final Long chatId, final String link) {
+        trackedLinks.computeIfAbsent(
+            link, _ -> new ArrayList<>()
+        ).add(chatId);
     }
 
-    public void untrackLink(Long chatId, String link) {
+    /**
+     * untrackLink - метод для отслеживания ссылок пользователей.
+     * @param chatId - id чата
+     * @param link - ссылка
+     */
+    public void untrackLink(final Long chatId, final String link) {
         trackedLinks.getOrDefault(link, new ArrayList<>()).remove(chatId);
         if (trackedLinks.getOrDefault(link, List.of()).isEmpty()) {
             trackedLinks.remove(link);
         }
     }
 
+    /**
+     * getAllTrackedLinks - метод для получения всех отслеживаемых ссылок.
+     * @return - список отслеживаемых ссылок
+     */
     public Set<String> getAllTrackedLinks() {
         return trackedLinks.keySet();
     }
 
-    public List<Long> getChatIdsForLink(String link) {
+    /**
+     * getChatIdsForLink - метод для получения id чатов для указанной ссылки.
+     * @param link - ссылка
+     * @return - список id чатов
+     */
+    public List<Long> getChatIdsForLink(final String link) {
         return trackedLinks.getOrDefault(link, List.of());
     }
 }
