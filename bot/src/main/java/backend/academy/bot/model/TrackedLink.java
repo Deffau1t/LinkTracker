@@ -3,6 +3,10 @@ package backend.academy.bot.model;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+/**
+ * TrackedLink представляет собой объект, который содержит информацию об отслеживаемой ссылке.
+ */
+
 @Getter
 @AllArgsConstructor
 public class TrackedLink {

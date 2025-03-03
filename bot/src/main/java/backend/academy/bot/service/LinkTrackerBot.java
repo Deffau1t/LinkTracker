@@ -11,6 +11,10 @@ import java.util.HashMap;
 import java.util.Map;
 import org.springframework.stereotype.Service;
 
+/**
+ * LinkTrackerBot - класс, отвечающий за работу бота.
+ */
+
 @Service
 public class LinkTrackerBot {
     private final TelegramBot bot;
@@ -19,6 +23,13 @@ public class LinkTrackerBot {
     private final Map<Long, String> userLinks = new HashMap<>();
     private final Map<Long, String> userTags = new HashMap<>();
     private final ScrapperClient scrapperClient;
+
+    /**
+     * LinkTrackerBot - конструктор класса.
+     * @param botConfig - конфигурация бота.
+     * @param linkUpdateService - сервис обновления ссылок.
+     * @param scrapperClient - клиент для получения данных с сайта.
+     */
 
     public LinkTrackerBot(BotConfig botConfig,
                           LinkUpdateService linkUpdateService,
@@ -37,6 +48,11 @@ public class LinkTrackerBot {
         );
     }
 
+    /**
+     * confirmUpdate - метод, который обрабатывает обновления от Telegram.
+     * @param update - обновление от Telegram.
+     */
+
     private void confirmUpdate(Update update) {
         if (update.message() == null || update.message().text() == null) return;
 
@@ -51,6 +67,12 @@ public class LinkTrackerBot {
             case WAITING_FOR_UNTRACK -> handleUntrack(chatId, text);
         }
     }
+
+    /**
+     * handleCommand - метод, который обрабатывает команды от пользователя.
+     * @param chatId - идентификатор чата.
+     * @param text - текст сообщения.
+     */
 
     private void handleCommand(Long chatId, String text) {
         if (text.equals("/start")) {

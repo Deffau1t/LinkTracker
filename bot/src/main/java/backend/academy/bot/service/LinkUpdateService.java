@@ -11,6 +11,10 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+/**
+ * LinkUpdateService - сервис для обновления ссылок.
+ */
+
 @Getter
 @Service
 @RequiredArgsConstructor
@@ -92,6 +96,12 @@ public class LinkUpdateService {
         linkTrackerBot.sendMessage(chatId, "Некорректная команда.");
     }
 
+    /**
+     * Метод для обновления ссылок.
+     * @param linkUpdate - обновление ссылки.
+     * @param linkTrackerBot - бот.
+     */
+
     public void updateLink(LinkUpdate linkUpdate, LinkTrackerBot linkTrackerBot) {
         try {
             if (linkUpdate == null || linkUpdate.tgChatIds() == null) {
@@ -128,13 +138,4 @@ public class LinkUpdateService {
         }
         return links.stream().anyMatch(trackedLink -> trackedLink.url().equals(link));
     }
-
-    public Set<String> getAllTrackedLinks() {
-        return chatSubscribes.values().stream()
-            .flatMap(List::stream)
-            .map(TrackedLink::url)
-            .collect(Collectors.toSet());
-    }
-
-
 }

@@ -5,6 +5,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * API error response model.
+ */
+
 @Getter
 @Setter
 @Builder

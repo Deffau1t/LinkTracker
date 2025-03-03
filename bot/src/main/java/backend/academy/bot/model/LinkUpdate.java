@@ -4,6 +4,9 @@ import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 
+/**
+ * LinkUpdate model.
+ */
 
 @Getter
 @Builder
