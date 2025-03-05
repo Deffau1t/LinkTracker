@@ -20,9 +20,9 @@ import org.springframework.web.client.RestTemplate;
 public class ScrapperClient {
 
     /**
-     * restTemplate - RestTemplate для отправки HTTP запросов.
+     * httpClient - RestTemplate для отправки HTTP запросов.
      */
-    private final RestTemplate restTemplate;
+    private final RestTemplate httpClient;
 
     /**
      * scrapperBaseUrl - Базовый URL для взаимодействия с scrapper.
@@ -36,7 +36,7 @@ public class ScrapperClient {
      */
     @Autowired
     public ScrapperClient(final RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+        this.httpClient = restTemplate;
     }
 
     /**
@@ -64,7 +64,7 @@ public class ScrapperClient {
         HttpEntity<String> request = new HttpEntity<>(requestBody, headers);
 
         try {
-            ResponseEntity<String> response = restTemplate.postForEntity(
+            ResponseEntity<String> response = httpClient.postForEntity(
                 url,
                 request,
                 String.class
@@ -91,7 +91,7 @@ public class ScrapperClient {
         String url = scrapperBaseUrl + "/tg-chat/" + chatId;
 
         try {
-            ResponseEntity<String> response = restTemplate.postForEntity(
+            ResponseEntity<String> response = httpClient.postForEntity(
                 url,
                 null,
                 String.class
@@ -130,7 +130,7 @@ public class ScrapperClient {
         log.info("Тело запроса: {}", request.getBody());
 
         try {
-            ResponseEntity<String> response = restTemplate.exchange(
+            ResponseEntity<String> response = httpClient.exchange(
                 url,
                 org.springframework.http.HttpMethod.DELETE,
                 request, String.class);

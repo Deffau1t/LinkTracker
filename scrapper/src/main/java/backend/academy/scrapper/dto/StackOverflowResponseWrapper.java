@@ -11,6 +11,9 @@ import java.util.List;
 
 @Getter
 public class StackOverflowResponseWrapper<T> {
+    /**
+     * Items - список элементов, которые возвращаются от API.
+     */
     @JsonProperty("items")
     private List<T> items;
 }

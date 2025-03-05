@@ -25,7 +25,7 @@ public class LinkTrackerBot {
     /**
      * Сервис обновления ссылок.
      */
-    private final LinkUpdateService linkUpdateService;
+    private final LinkUpdateService botLinkUpdateService;
 
     /**
      * Состояния пользователей.
@@ -45,7 +45,7 @@ public class LinkTrackerBot {
     /**
      * Клиент скраппера.
      */
-    private final ScrapperClient scrapperClient;
+    private final ScrapperClient scrapperBotClient;
 
     /**
      * LinkTrackerBot - конструктор класса.
@@ -57,8 +57,8 @@ public class LinkTrackerBot {
     public LinkTrackerBot(final BotConfig botConfig,
                           final LinkUpdateService linkUpdateService,
                           final ScrapperClient scrapperClient) {
-        this.linkUpdateService = linkUpdateService;
-        this.scrapperClient = scrapperClient;
+        this.botLinkUpdateService = linkUpdateService;
+        this.scrapperBotClient = scrapperClient;
         this.bot = new TelegramBot(botConfig.telegramToken());
 
         this.bot.setUpdatesListener(
@@ -90,7 +90,7 @@ public class LinkTrackerBot {
             case WAITING_FOR_TAGS -> handleTags(chatId, text);
             case WAITING_FOR_FILTERS -> handleFilters(chatId, text);
             case WAITING_FOR_UNTRACK -> handleUntrack(chatId, text);
-            default -> linkUpdateService.unknownCommand(chatId, this);
+            default -> botLinkUpdateService.unknownCommand(chatId, this);
         }
     }
 
@@ -102,9 +102,9 @@ public class LinkTrackerBot {
 
     private void handleCommand(final Long chatId, final String text) {
         if (text.equals("/start")) {
-            linkUpdateService.startCommand(chatId, this);
+            botLinkUpdateService.startCommand(chatId, this);
         } else if (text.equals("/help")) {
-            linkUpdateService.helpCommand(chatId, this);
+            botLinkUpdateService.helpCommand(chatId, this);
         } else if (text.equals("/track")) {
             userStates.put(chatId, BotState.WAITING_FOR_LINK);
             sendMessage(chatId, "Введите ссылку для отслеживания:");
@@ -112,9 +112,9 @@ public class LinkTrackerBot {
             userStates.put(chatId, BotState.WAITING_FOR_UNTRACK);
             sendMessage(chatId, "Введите ссылку для удаления:");
         } else if (text.equals("/list")) {
-            linkUpdateService.listCommand(chatId, this);
+            botLinkUpdateService.listCommand(chatId, this);
         } else {
-            linkUpdateService.unknownCommand(chatId, this);
+            botLinkUpdateService.unknownCommand(chatId, this);
         }
     }
 
@@ -128,15 +128,15 @@ public class LinkTrackerBot {
     }
 
     private void handleUntrack(final Long chatId, final String text) {
-        if (!linkUpdateService.isTrackingLink(chatId, text)) {
+        if (!botLinkUpdateService.isTrackingLink(chatId, text)) {
             sendMessage(chatId, "Вы не отслеживаете эту ссылку.");
             userStates.put(chatId, BotState.IDLE);
             return;
         }
 
-        scrapperClient.untrackLink(chatId, text);
+        scrapperBotClient.untrackLink(chatId, text);
 
-        linkUpdateService.untrackCommand(chatId, text, this);
+        botLinkUpdateService.untrackCommand(chatId, text, this);
 
         userStates.put(chatId, BotState.IDLE);
     }
@@ -158,9 +158,9 @@ public class LinkTrackerBot {
         String tags = userTags.getOrDefault(chatId, "");
         String filters = text.equals("-") ? "" : text;
 
-        scrapperClient.trackLink(chatId, link, tags, filters);
+        scrapperBotClient.trackLink(chatId, link, tags, filters);
 
-        linkUpdateService.trackCommand(chatId, link, tags, filters, this);
+        botLinkUpdateService.trackCommand(chatId, link, tags, filters, this);
 
         userStates.put(chatId, BotState.IDLE);
     }

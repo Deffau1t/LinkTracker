@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 
 /**
- * GitHubCommitResponse - класс для работы с данными коммита к GitHubIssueResponse.
+ * GitHubCommitResponse - класс для работы с данными коммита
+ * к GitHubIssueResponse.
  * @param commit
  */
 

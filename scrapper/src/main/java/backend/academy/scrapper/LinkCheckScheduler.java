@@ -2,9 +2,7 @@ package backend.academy.scrapper;
 
 import backend.academy.scrapper.client.GitHubClient;
 import backend.academy.scrapper.client.StackOverflowClient;
-import backend.academy.scrapper.dto.GitHubRepositoryResponse;
 import backend.academy.scrapper.dto.LinkUpdate;
-import backend.academy.scrapper.dto.StackOverflowQuestionResponse;
 import backend.academy.scrapper.repository.LinkTrackingRepository;
 import backend.academy.scrapper.service.BotClient;
 import java.util.List;
@@ -53,7 +51,7 @@ public class LinkCheckScheduler {
     private static final int FIXED_RATE = 60000;
 
     /**
-     * Хранит последнее известное обновление для каждой ссылки
+     * Хранит последнее известное обновление для каждой ссылки.
      */
     private final Map<String, String> lastUpdates = new ConcurrentHashMap<>();
 
@@ -76,7 +74,7 @@ public class LinkCheckScheduler {
     }
 
     /**
-     * Проверяем обновления в GitHub (коммиты, issues, комментарии)
+     * Проверяем обновления в GitHub (коммиты, issues, комментарии).
      * @param link - Ссылка на репозиторий на GitHub.
      */
     private void checkGitHubUpdates(final String link) {
@@ -127,7 +125,7 @@ public class LinkCheckScheduler {
     }
 
     /**
-     * Проверяем обновления в StackOverflow (ответы, комментарии)
+     * Проверяем обновления в StackOverflow (ответы, комментарии).
      * @param link - Ссылка на вопрос на StackOverflow.
      */
     private void checkStackOverflowUpdates(final String link) {
@@ -219,9 +217,11 @@ public class LinkCheckScheduler {
     }
 
     /**
-     * Проверяет, есть ли новое обновление по ссылке
+     * Проверяет, есть ли новое обновление по ссылке.
      * @param url - Ссылка на ресурс.
      *            newUpdate - Новое обновление.
+     * @param newUpdate - Новое обновление.
+     * @return - true, если обновление новое, иначе false.
      */
     private boolean isUpdated(final String url, final String newUpdate) {
         String lastUpdate = lastUpdates.get(url);
@@ -232,7 +232,13 @@ public class LinkCheckScheduler {
         return false;
     }
 
-    private Long extractQuestionId(String url) {
+    /**
+     * Извлекает ID вопроса из ссылки на StackOverflow.
+     * @param url - Ссылка на вопрос на StackOverflow.
+     * @return - ID вопроса или null, если не удалось извлечь.
+     */
+
+    private Long extractQuestionId(final String url) {
         Pattern pattern = Pattern.compile(
             "stackoverflow.com/questions/(\\d+)"
         );

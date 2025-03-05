@@ -1,6 +1,3 @@
-/**
- * Пакет с конфигурациями.
- */
 package backend.academy.bot.config;
 
 import org.springframework.context.annotation.Bean;

@@ -35,7 +35,8 @@ public class StackOverflowClient {
     /**
      * Конструктор класса StackOverflowClient.
      *
-     * @param scrapperConfig - объект конфигурации для доступа к Stack Overflow API.
+     * @param scrapperConfig - объект конфигурации для доступа
+     *                      к Stack Overflow API.
      */
     public StackOverflowClient(final ScrapperConfig scrapperConfig) {
         this.webClient = WebClient.builder()
@@ -83,7 +84,9 @@ public class StackOverflowClient {
             .bodyToMono(
                 new ParameterizedTypeReference<
                     StackOverflowResponseWrapper<StackOverflowCommentResponse>
-                    >() {}
+                    >() {
+
+                }
             )
             .map(StackOverflowResponseWrapper::items)
             .doOnError(error -> log.error(
@@ -109,7 +112,9 @@ public class StackOverflowClient {
             .bodyToMono(
                 new ParameterizedTypeReference<
                     StackOverflowResponseWrapper<StackOverflowAnswerResponse>
-                    >() {}
+                    >() {
+
+                }
             )
             .map(StackOverflowResponseWrapper::items)
             .doOnError(error -> log.error(
