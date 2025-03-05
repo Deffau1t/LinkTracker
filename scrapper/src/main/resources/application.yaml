@@ -8,7 +8,7 @@ app:
     accessToken: YOUR_STACKOVERFLOW_ACCESS_TOKEN
 
 bot:
-  base-url: http://localhost:8080
+  base-url: ${BOT_BASE_URL}
 
 spring:
   application:
