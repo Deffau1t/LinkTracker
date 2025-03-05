@@ -138,7 +138,7 @@ public class LinkUpdateService {
         try {
             List<TrackedLink> linksOfChatId = chatSubscribes.get(chatId);
             for (TrackedLink trackedLink : linksOfChatId) {
-                linksList.append(trackedLink).append("\n");
+                linksList.append(trackedLink.url()).append("\n");
             }
             linkTrackerBot.sendMessage(chatId, "Ваши ссылки:\n" + linksList);
         } catch (NullPointerException nullPointerException) {

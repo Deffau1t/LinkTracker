@@ -1,5 +1,5 @@
 app:
-  telegram-token: "7857432014:AAHu9nrNT7-ywrewhNmd-ba9FtmxRYiEcw8" # env variable
+  telegram-token: ${TELEGRAM_TOKEN}
 
 scrapper:
   base-url: http://localhost:8081

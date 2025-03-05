@@ -22,3 +22,5 @@ dependency-reduced-pom.xml
 ### log files ###
 *.log
 hs_err_pid*
+/bot/src/main/resources/bot.env
+/scrapper/src/main/resources/scrapper.env

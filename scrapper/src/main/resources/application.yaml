@@ -2,9 +2,9 @@ app:
   github-api-url: https://api.github.com
   stackoverflow-api-url: https://api.stackexchange.com/2.3
   github:
-    token: "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"
+    token: ${GITHUB_TOKEN}
   stackOverflow:
-    key: YOUR_STACKOVERFLOW_KEY
+    key: ${SO_KEY}
     accessToken: YOUR_STACKOVERFLOW_ACCESS_TOKEN
 
 bot:
