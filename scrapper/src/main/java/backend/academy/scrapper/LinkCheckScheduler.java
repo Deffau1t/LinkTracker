@@ -55,6 +55,10 @@ public class LinkCheckScheduler {
      */
     private final Map<String, String> lastUpdates = new ConcurrentHashMap<>();
 
+    private static final String GITHUB_LINK_REGEX = "github.com";
+
+    private static final String STACKOVERFLOW_LINK_REGEX = "stackoverflow.com";
+
     /**
      * Метод для проверки обновлений ссылок.
      */
@@ -65,9 +69,9 @@ public class LinkCheckScheduler {
         Set<String> trackedLinks = linkTrackingRepository.getAllTrackedLinks();
 
         for (String link : trackedLinks) {
-            if (link.contains("github.com")) {
+            if (link.contains(GITHUB_LINK_REGEX)) {
                 checkGitHubUpdates(link);
-            } else if (link.contains("stackoverflow.com")) {
+            } else if (link.contains(STACKOVERFLOW_LINK_REGEX)) {
                 checkStackOverflowUpdates(link);
             }
         }

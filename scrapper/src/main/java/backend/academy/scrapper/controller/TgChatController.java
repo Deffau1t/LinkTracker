@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Validated
 @RestController
-@RequestMapping(value = "/tg-chat", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/tg-chat")
 public class TgChatController {
 
     /**

@@ -1,7 +1,9 @@
 package backend.academy.bot.client;
 
+import backend.academy.bot.model.TrackLinkRequest;
+import backend.academy.bot.model.UntrackLinkRequest;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -34,7 +36,6 @@ public class ScrapperClient {
      * Конструктор класса ScrapperClient.
      * @param restTemplate - RestTemplate для отправки HTTP запросов.
      */
-    @Autowired
     public ScrapperClient(final RestTemplate restTemplate) {
         this.httpClient = restTemplate;
     }
@@ -47,37 +48,32 @@ public class ScrapperClient {
      * @param filters - Фильтры для отслеживания.
      */
 
-    public void trackLink(final Long chatId, final String link,
-                          final String tags, final String filters) {
+    public void trackLink(final Long chatId,
+                          final String link,
+                          final String tags,
+                          final String filters) {
         registerChatIfNeeded(chatId);
 
         String url = scrapperBaseUrl + "/links";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Tg-Chat-Id", chatId.toString());
+        HttpHeaders headers = createHeaders(chatId);
 
-        String requestBody = String.format(
-            "{\"link\":\"%s\", \"tags\":[\"%s\"], \"filters\":[\"%s\"]}",
-            link, tags, filters
+        TrackLinkRequest requestBody = new TrackLinkRequest(
+            link,
+            tags.isEmpty() ? List.of() : List.of(tags.split(" ")),
+            filters.isEmpty() ? List.of() : List.of(filters.split(" "))
         );
 
-        HttpEntity<String> request = new HttpEntity<>(requestBody, headers);
+        HttpEntity<TrackLinkRequest> request = new HttpEntity<>(requestBody, headers);
 
         try {
-            ResponseEntity<String> response = httpClient.postForEntity(
-                url,
-                request,
-                String.class
-            );
-
+            ResponseEntity<String> response = httpClient.postForEntity(url, request, String.class);
             if (response.getStatusCode().is2xxSuccessful()) {
-                log.info("Ссылка успешно добавлена в scrapper!");
+                log.info("✅ Ссылка успешно добавлена в scrapper!");
             } else {
-                log.error("Ошибка сервера: {} - {}",
-                    response.getStatusCode(), response.getBody());
+                log.error("❌ Ошибка сервера: {} - {}", response.getStatusCode(), response.getBody());
             }
         } catch (Exception e) {
-            log.error("Ошибка при отправке запроса: {}", e.getMessage());
+            log.error("🚨 Ошибка при отправке запроса: {}", e.getMessage());
         }
     }
 
@@ -118,38 +114,33 @@ public class ScrapperClient {
 
     public void untrackLink(final Long chatId, final String link) {
         String url = scrapperBaseUrl + "/links";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Tg-Chat-Id", chatId.toString());
+        HttpHeaders headers = createHeaders(chatId);
 
-        HttpEntity<String> request =
-            new HttpEntity<>(String.format("{\"link\":\"%s\"}", link), headers);
-
-        log.info("Отправка запроса на удаление: {}", url);
-        log.info("Заголовки: {}", headers);
-        log.info("Тело запроса: {}", request.getBody());
+        UntrackLinkRequest requestBody = new UntrackLinkRequest(link);
+        HttpEntity<UntrackLinkRequest> request = new HttpEntity<>(requestBody, headers);
 
         try {
             ResponseEntity<String> response = httpClient.exchange(
                 url,
                 org.springframework.http.HttpMethod.DELETE,
-                request, String.class);
+                request,
+                String.class
+            );
 
             if (response.getStatusCode().is2xxSuccessful()) {
-                log.info("Ссылка успешно удалена в scrapper.");
+                log.info("✅ Ссылка успешно удалена в scrapper.");
             } else {
-                log.error(
-                    "Ошибка при удалении: {} - {}",
-                    response.getStatusCode(),
-                    response.getBody()
-                );
+                log.error("❌ Ошибка при удалении: {} - {}", response.getStatusCode(), response.getBody());
             }
         } catch (Exception e) {
-            log.error(
-                "Ошибка при отправке запроса в scrapper: {}",
-                e.getMessage()
-            );
+            log.error("🚨 Ошибка при удалении ссылки: {}", e.getMessage());
         }
     }
 
+    private HttpHeaders createHeaders(final Long chatId) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Tg-Chat-Id", chatId.toString());
+        return headers;
+    }
 }
