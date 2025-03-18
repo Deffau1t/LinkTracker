@@ -2,6 +2,11 @@ package backend.academy.bot.service;
 
 import backend.academy.bot.BotConfig;
 import backend.academy.bot.client.ScrapperClient;
+import backend.academy.bot.commandHandler.CommandHandler;
+import backend.academy.bot.commandHandler.HelpCommandHandler;
+import backend.academy.bot.commandHandler.StartCommandHandler;
+import backend.academy.bot.commandHandler.TrackCommandHandler;
+import backend.academy.bot.commandHandler.UntrackCommandHandler;
 import backend.academy.bot.model.BotState;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
@@ -9,6 +14,7 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 /**
@@ -48,6 +54,11 @@ public class LinkTrackerBot {
     private final ScrapperClient scrapperBotClient;
 
     /**
+     * Команды бота - хранит обработчики команд.
+     */
+    private final Map<String, CommandHandler> commandHandlers = new HashMap<>();
+
+    /**
      * LinkTrackerBot - конструктор класса.
      * @param botConfig - конфигурация бота.
      * @param linkUpdateService - сервис обновления ссылок.
@@ -60,6 +71,12 @@ public class LinkTrackerBot {
         this.botLinkUpdateService = linkUpdateService;
         this.scrapperBotClient = scrapperClient;
         this.bot = new TelegramBot(botConfig.telegramToken());
+
+        commandHandlers.put("/start", new StartCommandHandler());
+        commandHandlers.put("/help", new HelpCommandHandler());
+        commandHandlers.put("/track", new TrackCommandHandler(userStates));
+        commandHandlers.put("/untrack", new UntrackCommandHandler(
+            linkUpdateService, scrapperClient, userStates));
 
         this.bot.setUpdatesListener(
             updates -> {
@@ -101,21 +118,14 @@ public class LinkTrackerBot {
      */
 
     private void handleCommand(final Long chatId, final String text) {
-        if (text.equals("/start")) {
-            botLinkUpdateService.startCommand(chatId, this);
-        } else if (text.equals("/help")) {
-            botLinkUpdateService.helpCommand(chatId, this);
-        } else if (text.equals("/track")) {
-            userStates.put(chatId, BotState.WAITING_FOR_LINK);
-            sendMessage(chatId, "Введите ссылку для отслеживания:");
-        } else if (text.equals("/untrack")) {
-            userStates.put(chatId, BotState.WAITING_FOR_UNTRACK);
-            sendMessage(chatId, "Введите ссылку для удаления:");
-        } else if (text.equals("/list")) {
-            botLinkUpdateService.listCommand(chatId, this);
-        } else {
-            botLinkUpdateService.unknownCommand(chatId, this);
-        }
+        Optional<CommandHandler> handlerOpt = commandHandlers.values().stream()
+                .filter(handler -> text.startsWith(handler.command()))
+                .findFirst();
+
+        handlerOpt.ifPresentOrElse(
+                handler -> handler.execute(chatId, text, this),
+                () -> sendMessage(chatId, "Неизвестная команда. Введите /help для списка команд.")
+        );
     }
 
     private void handleLink(final Long chatId, final String text) {
