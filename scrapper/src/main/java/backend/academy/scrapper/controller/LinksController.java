@@ -79,14 +79,15 @@ public class LinksController {
         final @RequestHeader("Tg-Chat-Id") Long chatId,
         final @RequestBody AddLinkRequest addLinkRequest) {
 
-        if (!tgChatService.isChatsRegistered(chatId)) {
-            ApiErrorResponse apiErrorResponse = ApiErrorResponse.builder()
-                .code("400")
-                .description("Некорректные параметры запроса")
-                .exceptionName("Bad Request")
-                .build();
-            return ResponseEntity.badRequest().body(apiErrorResponse);
-        }
+//        if (!tgChatService.isChatsRegistered(chatId)) {
+//            ApiErrorResponse apiErrorResponse = ApiErrorResponse.builder()
+//                .code("400")
+//                .description("Некорректные параметры запроса")
+//                .exceptionName("Bad Request")
+//                .build();
+//            return ResponseEntity.badRequest().body(apiErrorResponse);
+//        }
+        linksService.registerChat(chatId);
 
         LinkResponse savedLink = LinkResponse.builder()
                 .id(chatId)
@@ -97,7 +98,7 @@ public class LinksController {
                     ? addLinkRequest.filters() : Collections.emptyList())
                 .build();
 
-        linksService.addLinkOfChat(chatId, savedLink);
+        linksService.addLink(chatId, savedLink);
 
         return ResponseEntity.ok(savedLink);
     }
@@ -132,7 +133,7 @@ public class LinksController {
                 .body(apiErrorResponse);
         }
 
-        linksService.deleteLinkOfChat(chatId, removeLinkRequest);
+        linksService.removeLink(chatId, removeLinkRequest);
         return ResponseEntity.ok("Ссылка успешно убрана");
     }
 }

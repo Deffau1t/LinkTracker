@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15.2
+    container_name: scrapper_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: LinkTracker
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1
+    ports:
+      - "5432:5432"

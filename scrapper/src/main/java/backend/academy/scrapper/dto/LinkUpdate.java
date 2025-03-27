@@ -1,45 +1,28 @@
 package backend.academy.scrapper.dto;
 
+import jakarta.persistence.*;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-/**
- * LinkUpdate - дто для обновления ссылки.
- */
-
+@Entity
+@Table(name = "links")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class LinkUpdate {
-    /**
-     * Id - идентификатор ссылки.
-     */
-    @JsonProperty("id")
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * url - ссылка.
-     */
-    @JsonProperty("url")
+    @Column(nullable = false, unique = true)
     private String url;
 
-    /**
-     * description - описание ссылки.
-     */
-    @JsonProperty("description")
+    @Column
     private String description;
 
-    /**
-     * tgChatIds - список идентификаторов чатов Telegram,
-     * которые отслеживают эту ссылку.
-     */
-    @JsonProperty("tgChatIds")
+    @Transient  // Не хранится в БД, но используется в коде
     private List<Long> tgChatIds;
 }
