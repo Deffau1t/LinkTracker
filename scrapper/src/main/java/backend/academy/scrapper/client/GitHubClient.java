@@ -1,17 +1,16 @@
 package backend.academy.scrapper.client;
 
 
-
-import backend.academy.scrapper.ScrapperConfig;
-import backend.academy.scrapper.dto.GitHubCommentResponse;
+import backend.academy.scrapper.config.ScrapperConfig;
 import backend.academy.scrapper.dto.GitHubCommitResponse;
 import backend.academy.scrapper.dto.GitHubIssueResponse;
+import backend.academy.scrapper.dto.GitHubPullRequestResponse;
 import backend.academy.scrapper.dto.GitHubRepositoryResponse;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-import java.util.List;
 
 /**
  * Клиент для работы с GitHub API.
@@ -91,19 +90,13 @@ public class GitHubClient {
                 .collectList();
     }
 
-    /**
-     * Метод для получения списка комментариев в репозитории на GitHub.
-     * @param owner - владелец репозитория.
-     * @param repo - название репозитория.
-     * @return - Mono с объектом GitHubCommentResponse.
-     */
-    public Mono<List<GitHubCommentResponse>> fetchComments(
-        final String owner,
-        final String repo) {
+    public Mono<List<GitHubPullRequestResponse>> fetchPullRequests(String owner, String repo) {
         return webClient.get()
-                .uri("/repos/{owner}/{repo}/comments", owner, repo)
-                .retrieve()
-                .bodyToFlux(GitHubCommentResponse.class)
-                .collectList();
+            .uri("/repos/{owner}/{repo}/pulls?state=all", owner, repo)
+            .retrieve()
+            .bodyToFlux(GitHubPullRequestResponse.class)
+            .collectList()
+            .doOnNext(prs -> log.info("Found {} PRs for {}/{}", prs.size(), owner, repo))
+            .doOnError(e -> log.error("GitHub PRs fetch error: {}", e.getMessage()));
     }
 }

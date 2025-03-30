@@ -1,9 +1,9 @@
 package backend.academy.scrapper.service;
 
 import backend.academy.scrapper.dto.LinkResponse;
-import backend.academy.scrapper.dto.LinkUpdate;
 import backend.academy.scrapper.dto.RemoveLinkRequest;
 import java.util.List;
+import backend.academy.scrapper.entity.LinkUpdate;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -38,8 +38,11 @@ public class SqlLinksService implements LinksService {
         String insertLinkSql = "INSERT INTO links (url, description) VALUES (?, ?) ON CONFLICT (url) DO NOTHING";
         jdbcTemplate.update(insertLinkSql, url, description);
 
-        String linkChatSql = "INSERT INTO link_tg_chat (link_id, tg_chat_id) SELECT id, ? FROM links WHERE url = ?";
+        String linkChatSql = "INSERT INTO link_tg_chat (link_id, tg_chat_id) " +
+                     "SELECT id, ? FROM links WHERE url = ? " +
+                     "ON CONFLICT (link_id, tg_chat_id) DO NOTHING";
         jdbcTemplate.update(linkChatSql, chatId, url);
+
     }
 
     @Override
@@ -52,11 +55,17 @@ public class SqlLinksService implements LinksService {
     @Override
     public List<LinkUpdate> getAllLinks(Long chatId) {
         String sql = "SELECT l.id, l.url, l.description FROM links l JOIN link_tg_chat lt ON l.id = lt.link_id WHERE lt.tg_chat_id = ?";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new LinkUpdate(
+        return jdbcTemplate.query(sql, (rs, _) -> new LinkUpdate(
             rs.getLong("id"),
             rs.getString("url"),
             rs.getString("description"),
             List.of(chatId)
         ), chatId);
+    }
+
+    @Override
+    public List<Long> getAllChatIds() {
+        String sql = "SELECT id FROM tg_chats";
+        return jdbcTemplate.queryForList(sql, Long.class);
     }
 }

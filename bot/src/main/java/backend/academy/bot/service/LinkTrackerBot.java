@@ -1,6 +1,6 @@
 package backend.academy.bot.service;
 
-import backend.academy.bot.BotConfig;
+import backend.academy.bot.config.BotConfig;
 import backend.academy.bot.client.ScrapperClient;
 import backend.academy.bot.commandHandler.CommandHandler;
 import backend.academy.bot.commandHandler.HelpCommandHandler;

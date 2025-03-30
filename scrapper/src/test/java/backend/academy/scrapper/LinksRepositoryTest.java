@@ -1,6 +1,7 @@
 package backend.academy.scrapper;
 
-import backend.academy.scrapper.dto.LinkUpdate;
+
+import backend.academy.scrapper.entity.LinkUpdate;
 import backend.academy.scrapper.repository.LinksRepository;
 import java.util.List;
 import org.junit.jupiter.api.Test;

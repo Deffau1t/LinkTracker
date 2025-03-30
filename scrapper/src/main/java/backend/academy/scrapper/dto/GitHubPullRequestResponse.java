@@ -4,11 +4,9 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * GitHubIssueResponse - класс для представления данных об issue на GitHub.
- */
+
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record GitHubIssueResponse(
+public record GitHubPullRequestResponse(
     @JsonProperty("id") Long id,
     @JsonProperty("title") String title,
     @JsonProperty("user") GitHubUser user,
@@ -17,8 +15,6 @@ public record GitHubIssueResponse(
     String createdAt,
     @JsonProperty("body") String body,
     @JsonProperty("state") String state,
-    @JsonProperty("html_url") String htmlUrl,
-    @JsonProperty("pull_request")
-    Object pullRequest
+    @JsonProperty("html_url") String htmlUrl
 ) {
 }

@@ -1,8 +1,8 @@
 package backend.academy.scrapper.service;
 
 import backend.academy.scrapper.dto.LinkResponse;
-import backend.academy.scrapper.dto.LinkUpdate;
 import backend.academy.scrapper.dto.RemoveLinkRequest;
+import backend.academy.scrapper.entity.LinkUpdate;
 import backend.academy.scrapper.repository.LinksRepository;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -41,5 +41,10 @@ public class OrmLinksService implements LinksService {
     @Override
     public List<LinkUpdate> getAllLinks(Long chatId) {
         return linksRepository.getAllLinks(chatId);
+    }
+
+    @Override
+    public List<Long> getAllChatIds() {
+        return linksRepository.getAllChatIds();
     }
 }

@@ -1,10 +1,12 @@
 package backend.academy.scrapper;
 
+import backend.academy.scrapper.client.BotClient;
 import backend.academy.scrapper.client.GitHubClient;
 import backend.academy.scrapper.client.StackOverflowClient;
-import backend.academy.scrapper.dto.LinkUpdate;
-import backend.academy.scrapper.repository.LinkTrackingRepository;
-import backend.academy.scrapper.service.BotClient;
+import backend.academy.scrapper.dto.GitHubIssueResponse;
+import backend.academy.scrapper.dto.GitHubPullRequestResponse;
+import backend.academy.scrapper.entity.LinkUpdate;
+import backend.academy.scrapper.repository.LinksRepository;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,201 +18,129 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-/**
- * Класс для проверки обновлений ссылок.
- */
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class LinkCheckScheduler {
 
-    /**
-     * gitHubClient - Клиент для GitHub API.
-     */
     private final GitHubClient gitHubClient;
-
-    /**
-     * stackOverflowClient - Клиент для Stack Overflow API.
-     */
     private final StackOverflowClient stackOverflowClient;
-
-    /**
-     * botClient - Клиент для бота.
-     */
     private final BotClient botClient;
+    private final LinksRepository linksRepository;
 
-    /**
-     * linkTrackingRepository - Репозиторий для отслеживания ссылок.
-     */
-    private final LinkTrackingRepository linkTrackingRepository;
-
-    /**
-     * FIXED_RATE - Периодичность проверки обновлений в миллисекундах.
-     */
     private static final int FIXED_RATE = 60000;
-
-    /**
-     * Хранит последнее известное обновление для каждой ссылки.
-     */
     private final Map<String, String> lastUpdates = new ConcurrentHashMap<>();
 
     private static final String GITHUB_LINK_REGEX = "github.com";
-
     private static final String STACKOVERFLOW_LINK_REGEX = "stackoverflow.com";
 
-    /**
-     * Метод для проверки обновлений ссылок.
-     */
+    private final Map<String, String> lastSeenUpdates = new ConcurrentHashMap<>();
+    private final Set<String> initializedLinks = ConcurrentHashMap.newKeySet();
+
     @Scheduled(fixedRate = FIXED_RATE)
     public void checkForUpdates() {
-        log.info("Запуск проверки обновлений...");
+        log.info("🔍 Запуск проверки обновлений...");
 
-        Set<String> trackedLinks = linkTrackingRepository.getAllTrackedLinks();
+        List<Long> chatIds = linksRepository.getAllChatIds();
 
-        for (String link : trackedLinks) {
-            if (link.contains(GITHUB_LINK_REGEX)) {
-                checkGitHubUpdates(link);
-            } else if (link.contains(STACKOVERFLOW_LINK_REGEX)) {
-                checkStackOverflowUpdates(link);
+        for (Long chatId : chatIds) {
+            List<LinkUpdate> linkUpdates = linksRepository.getAllLinks(chatId);
+
+            for (LinkUpdate link : linkUpdates) {
+                if (link.url().contains(GITHUB_LINK_REGEX)) {
+                    checkGitHubUpdates(link.url(), chatId);
+                } else if (link.url().contains(STACKOVERFLOW_LINK_REGEX)) {
+                    checkStackOverflowUpdates(link.url(), chatId);
+                }
             }
         }
     }
 
-    /**
-     * Проверяем обновления в GitHub (коммиты, issues, комментарии).
-     * @param link - Ссылка на репозиторий на GitHub.
-     */
-    private void checkGitHubUpdates(final String link) {
-        String[] parts = link.replace(
-            "https://github.com/",
-            "")
-            .split("/");
-
-        if (parts.length < 2) {
-            return;
-        }
+    private void checkGitHubUpdates(final String link, Long chatId) {
+        String[] parts = link.replace("https://github.com/", "").split("/");
+        if (parts.length < 2) return;
 
         String owner = parts[0];
         String repo = parts[1];
 
-        gitHubClient.fetchCommits(owner, repo).subscribe(commits -> {
-            if (!commits.isEmpty()) {
-                String latestCommit = commits.get(0).commit().message();
-                if (isUpdated(link, latestCommit)) {
-                    sendUpdate(
-                        link,
-                        "Новый коммит в " + repo + ": " + latestCommit
-                    );
-                }
-            }
-        });
-
-
+        // Проверка Issues
         gitHubClient.fetchIssues(owner, repo).subscribe(issues -> {
-            if (!issues.isEmpty()) {
-                 String latestIssue = issues.get(0).title();
-                 if (isUpdated(link, latestIssue)) {
-                     sendUpdate(link,
-                         "Новое issue в " + repo + ": " + latestIssue);
-                 }
-            }
-        });
+            for (GitHubIssueResponse issue : issues) {
+                if (issue.pullRequest() != null) {
+                    continue;
+                }
 
-        gitHubClient.fetchComments(owner, repo).subscribe(comments -> {
-            if (!comments.isEmpty()) {
-                String latestComment = comments.get(0).body();
-                if (isUpdated(link, latestComment)) {
-                    sendUpdate(link,
-                        "Новый комментарий в " + repo + ": " + latestComment);
+                String messageKey = "issue:" + issue.id();
+                String message = formatGitHubMessage("Issue", issue.title(),
+                    issue.user().login(), issue.createdAt(), issue.body(),
+                    issue.state(), issue.htmlUrl());
+
+                if (!initializedLinks.contains(link)) {
+                    lastSeenUpdates.put(messageKey, message);
+                } else if (!message.equals(lastSeenUpdates.get(messageKey))) {
+                    sendUpdate(link, message, List.of(chatId));
+                    lastSeenUpdates.put(messageKey, message);
                 }
             }
         });
-    }
 
-    /**
-     * Проверяем обновления в StackOverflow (ответы, комментарии).
-     * @param link - Ссылка на вопрос на StackOverflow.
-     */
-    private void checkStackOverflowUpdates(final String link) {
-        log.info("🔍 Проверка обновлений StackOverflow для: {}", link);
-        try {
-            Long questionId = extractQuestionId(link);
-            if (questionId == null) {
-                log.error(
-                    "❌ Не удалось извлечь ID вопроса из ссылки: {}",
-                    link
-                );
-                return;
+        // Проверка Pull Requests
+        gitHubClient.fetchPullRequests(owner, repo).subscribe(pullRequests -> {
+            for (GitHubPullRequestResponse pr : pullRequests) {
+                String messageKey = "pr:" + pr.id();
+                String message = formatGitHubMessage("Pull Request", pr.title(),
+                    pr.user().login(), pr.createdAt(), pr.body(),
+                    pr.state(), pr.htmlUrl());
+
+                if (!initializedLinks.contains(link)) {
+                    lastSeenUpdates.put(messageKey, message);
+                } else if (!message.equals(lastSeenUpdates.get(messageKey))) {
+                    sendUpdate(link, message, List.of(chatId));
+                    lastSeenUpdates.put(messageKey, message);
+                }
             }
+        });
 
-            log.info(
-                "📡 Отправка запроса на ответы StackOverflow для {}",
-                questionId);
-            stackOverflowClient.fetchAnswers(questionId).subscribe(answers -> {
-                if (answers == null || answers.isEmpty()) {
-                    log.info(
-                        "⚠️ Нет новых ответов для вопроса {}",
-                        questionId);
-                    return;
-                }
-
-                String latestAnswer = answers.get(0).body();
-                if (latestAnswer != null && isUpdated(link, latestAnswer)) {
-                    sendUpdate(
-                        link,
-                        "📌 Новый ответ в StackOverflow: " + latestAnswer
-                    );
-                }
-            }, error -> log.error(
-                "❌ Ошибка при запросе ответов StackOverflow: {}",
-                error.getMessage())
-            );
-
-            log.info(
-                "📡 Отправка запроса на комментарии StackOverflow для {}",
-                questionId
-            );
-
-            stackOverflowClient.fetchComments(questionId).subscribe(
-                comments -> {
-                    if (comments == null || comments.isEmpty()) {
-                        log.info(
-                            "⚠️ Нет новых комментариев для вопроса {}",
-                            questionId);
-                        return;
-                    }
-
-                    String latestComment = comments.get(0).body();
-                    if (latestComment != null
-                        && isUpdated(link, latestComment)) {
-                            sendUpdate(
-                                link,
-                                "💬 Новый комментарий в StackOverflow: "
-                                    + latestComment
-                            );
-                    }
-            }, error -> log.error(
-                "❌ Ошибка при запросе комментариев StackOverflow: {}",
-                    error.getMessage())
-            );
-
-        } catch (Exception e) {
-            log.error(
-                "🚨 Ошибка при проверке обновлений для {}: {}",
-                link,
-                e.getMessage(), e);
+        if (!initializedLinks.contains(link)) {
+            initializedLinks.add(link);
+            log.info("Инициализирована проверка ссылки: {}", link);
         }
     }
 
 
-    /**
-     * Метод для отправки уведомления о новом обновлении.
-     * @param url - Ссылка на обновленный ресурс.
-     * @param description - Описание обновления.
-     */
-    private void sendUpdate(final String url, final String description) {
-        List<Long> chatIds = linkTrackingRepository.getChatIdsForLink(url);
+    private void checkStackOverflowUpdates(final String link, Long chatId) {
+        log.info("🔍 Проверка обновлений StackOverflow для: {}", link);
+        try {
+            Long questionId = extractQuestionId(link);
+            if (questionId == null) {
+                return;
+            }
+
+            stackOverflowClient.fetchAnswers(questionId).subscribe(answers -> {
+                if (!answers.isEmpty()) {
+                    var latestAnswer = answers.getFirst();
+                    String message = formatStackOverflowMessage("Ответ", latestAnswer.questionTitle(), latestAnswer.owner().displayName(), latestAnswer.creationDate(), latestAnswer.body());
+                    if (isUpdated(link, message)) {
+                        sendUpdate(link, message, List.of(chatId));
+                    }
+                }
+            });
+
+            stackOverflowClient.fetchComments(questionId).subscribe(comments -> {
+                if (!comments.isEmpty()) {
+                    var latestComment = comments.getFirst();
+                    String message = formatStackOverflowMessage("Комментарий", latestComment.questionTitle(), latestComment.owner().displayName(), latestComment.creationDate(), latestComment.body());
+                    if (isUpdated(link, message)) {
+                        sendUpdate(link, message, List.of(chatId));
+                    }
+                }
+            });
+        } catch (Exception e) {
+            log.error("🚨 Ошибка при проверке обновлений для {}: {}", link, e.getMessage(), e);
+        }
+    }
+
+    private void sendUpdate(final String url, final String description, List<Long> chatIds) {
         if (!chatIds.isEmpty()) {
             botClient.sendUpdate(LinkUpdate.builder()
                     .url(url)
@@ -220,13 +150,6 @@ public class LinkCheckScheduler {
         }
     }
 
-    /**
-     * Проверяет, есть ли новое обновление по ссылке.
-     * @param url - Ссылка на ресурс.
-     *            newUpdate - Новое обновление.
-     * @param newUpdate - Новое обновление.
-     * @return - true, если обновление новое, иначе false.
-     */
     private boolean isUpdated(final String url, final String newUpdate) {
         String lastUpdate = lastUpdates.get(url);
         if (lastUpdate == null || !lastUpdate.equals(newUpdate)) {
@@ -236,23 +159,24 @@ public class LinkCheckScheduler {
         return false;
     }
 
-    /**
-     * Извлекает ID вопроса из ссылки на StackOverflow.
-     * @param url - Ссылка на вопрос на StackOverflow.
-     * @return - ID вопроса или null, если не удалось извлечь.
-     */
-
     private Long extractQuestionId(final String url) {
-        Pattern pattern = Pattern.compile(
-            "stackoverflow.com/questions/(\\d+)"
-        );
+        Pattern pattern = Pattern.compile("stackoverflow.com/questions/(\\d+)");
         Matcher matcher = pattern.matcher(url);
         if (matcher.find()) {
-            Long questionId = Long.parseLong(matcher.group(1));
-            log.info("✅ Извлечен ID вопроса: {}", questionId);
-            return questionId;
+            return Long.parseLong(matcher.group(1));
         }
-        log.error("❌ Не удалось извлечь ID вопроса из: {}", url);
         return null;
+    }
+
+    private String formatGitHubMessage(String type, String title, String author, String date, String body, String state, String url) {
+        return String.format("[%s] %s\nАвтор: %s\nДата: %s\n%s%sОписание: %s", type, title, author, date,
+                (state != null ? "Статус: " + state + "\n" : ""),
+                (url != null ? "Ссылка: " + url + "\n" : ""),
+                body != null ? body.substring(0, Math.min(body.length(), 200)) : "Без описания");
+    }
+
+    private String formatStackOverflowMessage(String type, String questionTitle, String user, String date, String body) {
+        return String.format("[%s] Вопрос: %s\nАвтор: %s\nДата: %s\nПревью: %s", type, questionTitle, user, date,
+                body != null ? body.substring(0, Math.min(body.length(), 200)) : "Без текста");
     }
 }
