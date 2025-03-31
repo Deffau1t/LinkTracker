@@ -10,9 +10,9 @@ public record GitHubPullRequestResponse(
     @JsonProperty("id") Long id,
     @JsonProperty("title") String title,
     @JsonProperty("user") GitHubUser user,
-    @JsonProperty("created_at")
+    @JsonProperty("updated_at")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
-    String createdAt,
+    String updatedAt,
     @JsonProperty("body") String body,
     @JsonProperty("state") String state,
     @JsonProperty("html_url") String htmlUrl

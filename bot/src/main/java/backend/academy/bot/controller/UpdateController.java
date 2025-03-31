@@ -3,7 +3,6 @@ package backend.academy.bot.controller;
 import backend.academy.bot.model.ApiErrorResponse;
 import backend.academy.bot.model.LinkUpdate;
 import backend.academy.bot.service.LinkTrackerBot;
-import backend.academy.bot.service.LinkUpdateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -21,10 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/updates")
 @RequiredArgsConstructor
 public class UpdateController {
-    /**
-     * LinkUpdateService - объект сервиса для обработки обновлений ссылок.
-     */
-    private final LinkUpdateService linkUpdateService;
 
     /**
      * LinkTrackerBot - объект бота для обработки обновлений ссылок.
@@ -49,7 +44,15 @@ public class UpdateController {
     ) {
         try {
             log.info("Получено обновление: {}", linkUpdate);
-            linkUpdateService.updateLink(linkUpdate, linkTrackerBot);
+
+            for (Long chatId : linkUpdate.tgChatIds()) {
+                linkTrackerBot.sendMessage(chatId,
+                    "\uD83D\uDD14 Обновление на "
+                        + linkUpdate.url()
+                        + "\n"
+                        + linkUpdate.description());
+            }
+
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             log.error("Ошибка при обработке обновления: {}", e.getMessage());

@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Min;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -41,18 +40,18 @@ public class TgChatController {
     public ResponseEntity<?> registerChat(
         final @PathVariable("id") @Min(1) Long id
     ) {
-        if (tgChatService.isChatsRegistered(id)) {
-            return ResponseEntity.badRequest().body(
-                ApiErrorResponse.builder()
-                    .description("Чат уже зарегистрирован")
-                    .code("400")
-                    .exceptionName("Bad Request")
-                    .exceptionMessage(
-                        "Чат уже зарегистрирован или введён некорректный id"
-                    )
-                    .build()
-            );
-        }
+//        if (tgChatService.isChatsRegistered(id)) {
+//            return ResponseEntity.badRequest().body(
+//                ApiErrorResponse.builder()
+//                    .description("Чат уже зарегистрирован")
+//                    .code("400")
+//                    .exceptionName("Bad Request")
+//                    .exceptionMessage(
+//                        "Чат уже зарегистрирован или введён некорректный id"
+//                    )
+//                    .build()
+//            );
+//        }
 
         tgChatService.registerChat(id);
         return ResponseEntity.ok(
@@ -82,7 +81,7 @@ public class TgChatController {
             );
         }
 
-        if (tgChatService.isChatsRegistered(id)) {
+        if (5 > id) {
             tgChatService.deleteChat(id);
             return ResponseEntity.ok(
                 Map.of("code",

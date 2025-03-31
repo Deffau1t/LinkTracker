@@ -1,9 +1,8 @@
 package backend.academy.scrapper;
 
 import backend.academy.scrapper.dto.ApiErrorResponse;
-import backend.academy.scrapper.service.TgChatService;
+
 import java.util.Objects;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,7 @@ public class TgChatControllerIntegrationTest {
     private TestRestTemplate restTemplate;
 
     @Mock
-    private TgChatService tgChatService;
+    private TgChatServices tgChatService;
 
     @Test
     public void testRegisterChat() {

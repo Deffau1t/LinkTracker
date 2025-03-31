@@ -4,22 +4,18 @@ import backend.academy.bot.client.ScrapperClient;
 import backend.academy.bot.service.LinkTrackerBot;
 import lombok.AllArgsConstructor;
 
-/**
- * StartCommandHandler - обработчик команды /start.
- */
-@AllArgsConstructor
-public class StartCommandHandler implements CommandHandler {
 
+@AllArgsConstructor
+public class ListCommandHandler implements CommandHandler {
     private final ScrapperClient scrapperClient;
 
     @Override
     public String command() {
-        return "/start";
+        return "/list";
     }
 
     @Override
     public void execute(Long chatId, String message, LinkTrackerBot bot) {
-        scrapperClient.registerChatIfNeeded(chatId);
-        bot.sendMessage(chatId, "✅ Вы успешно зарегистрированы в системе.");
+        bot.sendMessage(chatId, "Список ваших ссылок:\n" + scrapperClient.getTrackedLinks(chatId));
     }
 }

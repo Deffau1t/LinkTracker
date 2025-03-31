@@ -1,8 +1,7 @@
-package backend.academy.scrapper.dto;
+package backend.academy.bot.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -17,24 +16,25 @@ public class LinkResponse {
     /**
      * Id - идентификатор ссылки.
      */
-    @JsonProperty(value = "id", required = true)
     private Long id;
 
     /**
      * url - ссылка.
      */
-    @JsonProperty(value = "url", required = true)
     private String url;
 
     /**
      * tags - теги.
      */
-    @JsonProperty(value = "tags", required = true)
     private List<String> tags;
 
     /**
      * filters - фильтры.
      */
-    @JsonProperty(value = "filters", required = true)
     private List<String> filters;
+
+    @Override
+    public String toString() {
+        return String.format("URL: %s | Tags: %s | Filters: %s \n", url, tags, filters);
+    }
 }

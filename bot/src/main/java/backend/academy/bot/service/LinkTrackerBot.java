@@ -1,5 +1,6 @@
 package backend.academy.bot.service;
 
+import backend.academy.bot.commandHandler.ListCommandHandler;
 import backend.academy.bot.config.BotConfig;
 import backend.academy.bot.client.ScrapperClient;
 import backend.academy.bot.commandHandler.CommandHandler;
@@ -29,11 +30,6 @@ public class LinkTrackerBot {
     private final TelegramBot bot;
 
     /**
-     * Сервис обновления ссылок.
-     */
-    private final LinkUpdateService botLinkUpdateService;
-
-    /**
      * Состояния пользователей.
      */
     private final Map<Long, BotState> userStates = new HashMap<>();
@@ -61,22 +57,20 @@ public class LinkTrackerBot {
     /**
      * LinkTrackerBot - конструктор класса.
      * @param botConfig - конфигурация бота.
-     * @param linkUpdateService - сервис обновления ссылок.
      * @param scrapperClient - клиент для получения данных с сайта.
      */
 
     public LinkTrackerBot(final BotConfig botConfig,
-                          final LinkUpdateService linkUpdateService,
                           final ScrapperClient scrapperClient) {
-        this.botLinkUpdateService = linkUpdateService;
         this.scrapperBotClient = scrapperClient;
         this.bot = new TelegramBot(botConfig.telegramToken());
 
-        commandHandlers.put("/start", new StartCommandHandler());
+        commandHandlers.put("/start", new StartCommandHandler(scrapperBotClient));
         commandHandlers.put("/help", new HelpCommandHandler());
         commandHandlers.put("/track", new TrackCommandHandler(userStates));
         commandHandlers.put("/untrack", new UntrackCommandHandler(
-            linkUpdateService, scrapperClient, userStates));
+            scrapperClient, userStates));
+        commandHandlers.put("/list", new ListCommandHandler(scrapperBotClient));
 
         this.bot.setUpdatesListener(
             updates -> {
@@ -107,7 +101,7 @@ public class LinkTrackerBot {
             case WAITING_FOR_TAGS -> handleTags(chatId, text);
             case WAITING_FOR_FILTERS -> handleFilters(chatId, text);
             case WAITING_FOR_UNTRACK -> handleUntrack(chatId, text);
-            default -> botLinkUpdateService.unknownCommand(chatId, this);
+            default -> handleCommand(chatId, text);
         }
     }
 
@@ -138,16 +132,17 @@ public class LinkTrackerBot {
     }
 
     private void handleUntrack(final Long chatId, final String text) {
-        if (!botLinkUpdateService.isTrackingLink(chatId, text)) {
-            sendMessage(chatId, "Вы не отслеживаете эту ссылку.");
-            userStates.put(chatId, BotState.IDLE);
-            return;
+        if (scrapperBotClient.untrackLink(chatId, text)) {
+            sendMessage(
+            chatId,
+            "Ссылка успешно удалена."
+            );
+        } else {
+                sendMessage(
+                chatId,
+                "Произошла ошибка при удалении ссылки."
+                );
         }
-
-        scrapperBotClient.untrackLink(chatId, text);
-
-        botLinkUpdateService.untrackCommand(chatId, text, this);
-
         userStates.put(chatId, BotState.IDLE);
     }
 
@@ -168,9 +163,16 @@ public class LinkTrackerBot {
         String tags = userTags.getOrDefault(chatId, "");
         String filters = text.equals("-") ? "" : text;
 
-        scrapperBotClient.trackLink(chatId, link, tags, filters);
-
-        botLinkUpdateService.trackCommand(chatId, link, tags, filters, this);
+        if (scrapperBotClient.trackLink(chatId, link, tags, filters)) {
+            sendMessage(
+                chatId,
+                "Ссылка успешно добавлена."
+            );
+        } else {
+            sendMessage(
+                chatId,
+                "Произошла ошибка при добавлении ссылки.");
+        }
 
         userStates.put(chatId, BotState.IDLE);
     }

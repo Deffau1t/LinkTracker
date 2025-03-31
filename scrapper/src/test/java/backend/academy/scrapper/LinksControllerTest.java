@@ -1,7 +1,6 @@
 package backend.academy.scrapper;
 
 import backend.academy.scrapper.controller.LinksController;
-import backend.academy.scrapper.service.TgChatService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,7 +20,7 @@ public class LinksControllerTest {
     private MockMvc mockMvc;
 
     @Mock
-    private TgChatService tgChatService;
+    private TgChatServices tgChatService;
 
     @InjectMocks
     private LinksController linksController;

@@ -5,10 +5,15 @@ import backend.academy.scrapper.dto.ApiErrorResponse;
 import backend.academy.scrapper.dto.LinkResponse;
 import backend.academy.scrapper.dto.ListLinksResponse;
 import backend.academy.scrapper.dto.RemoveLinkRequest;
+import backend.academy.scrapper.entity.LinkUpdate;
 import backend.academy.scrapper.service.LinksService;
 import backend.academy.scrapper.service.TgChatService;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/links", produces = MediaType.APPLICATION_JSON_VALUE)
+@Slf4j
 public class LinksController {
 
     /**
@@ -49,8 +55,8 @@ public class LinksController {
      */
     @GetMapping
     public ResponseEntity<?> getLinks(
-        final @RequestHeader("Tg-Chat-Id") Long chatId) {
-        if (!tgChatService.isChatsRegistered(chatId)) {
+        final @RequestHeader("Tg-Chat-Id") Long chatId) throws JsonProcessingException {
+        if (!tgChatService.isChatRegistered(chatId)) {
             ApiErrorResponse apiErrorResponse = ApiErrorResponse.builder()
                 .code("400")
                 .description("Некорректные параметры запроса")
@@ -58,13 +64,21 @@ public class LinksController {
                 .build();
             return ResponseEntity.badRequest().body(apiErrorResponse);
         }
-        LinkResponse linkResponse = LinkResponse.builder()
-            .id(chatId)
+        List<LinkUpdate> links = tgChatService.getAllLinks(chatId);
+
+        List<LinkResponse> linkResponses = links.stream()
+            .map(link -> LinkResponse.builder()
+                .id(link.id())
+                .url(link.url())
+                .build())
+            .collect(Collectors.toList());
+
+        ListLinksResponse response = ListLinksResponse.builder()
+            .links(linkResponses)
+            .size(linkResponses.size())
             .build();
-        ListLinksResponse listLinksResponse = ListLinksResponse.builder()
-            .links(List.of(linkResponse))
-            .build();
-        return ResponseEntity.ok(listLinksResponse);
+
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -79,15 +93,14 @@ public class LinksController {
         final @RequestHeader("Tg-Chat-Id") Long chatId,
         final @RequestBody AddLinkRequest addLinkRequest) {
 
-//        if (!tgChatService.isChatsRegistered(chatId)) {
-//            ApiErrorResponse apiErrorResponse = ApiErrorResponse.builder()
-//                .code("400")
-//                .description("Некорректные параметры запроса")
-//                .exceptionName("Bad Request")
-//                .build();
-//            return ResponseEntity.badRequest().body(apiErrorResponse);
-//        }
-        linksService.registerChat(chatId);
+        if (!tgChatService.isChatRegistered(chatId)) {
+            ApiErrorResponse apiErrorResponse = ApiErrorResponse.builder()
+                .code("400")
+                .description("Некорректные параметры запроса")
+                .exceptionName("Bad Request")
+                .build();
+            return ResponseEntity.badRequest().body(apiErrorResponse);
+        }
 
         LinkResponse savedLink = LinkResponse.builder()
                 .id(chatId)
@@ -122,7 +135,7 @@ public class LinksController {
             return ResponseEntity.badRequest().body(apiErrorResponse);
         }
 
-        if (!tgChatService.isChatsRegistered(chatId)) {
+        if (!tgChatService.isChatRegistered(chatId)) {
             ApiErrorResponse apiErrorResponse = ApiErrorResponse.builder()
                 .code("404")
                 .description("Ссылка не найдена")

@@ -6,7 +6,9 @@ import backend.academy.scrapper.client.StackOverflowClient;
 import backend.academy.scrapper.dto.GitHubIssueResponse;
 import backend.academy.scrapper.dto.GitHubPullRequestResponse;
 import backend.academy.scrapper.entity.LinkUpdate;
-import backend.academy.scrapper.repository.LinksRepository;
+import backend.academy.scrapper.repository.TgChatRepository;
+import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,7 +28,7 @@ public class LinkCheckScheduler {
     private final GitHubClient gitHubClient;
     private final StackOverflowClient stackOverflowClient;
     private final BotClient botClient;
-    private final LinksRepository linksRepository;
+    private final TgChatRepository tgChatRepository;
 
     private static final int FIXED_RATE = 60000;
     private final Map<String, String> lastUpdates = new ConcurrentHashMap<>();
@@ -37,14 +39,17 @@ public class LinkCheckScheduler {
     private final Map<String, String> lastSeenUpdates = new ConcurrentHashMap<>();
     private final Set<String> initializedLinks = ConcurrentHashMap.newKeySet();
 
+    private final Map<String, Instant> firstCheckTime = new ConcurrentHashMap<>();
+    private final Map<String, Set<Long>> processedEntities = new ConcurrentHashMap<>();
+
     @Scheduled(fixedRate = FIXED_RATE)
     public void checkForUpdates() {
         log.info("🔍 Запуск проверки обновлений...");
 
-        List<Long> chatIds = linksRepository.getAllChatIds();
+        List<Long> chatIds = tgChatRepository.getAllChatIds();
 
         for (Long chatId : chatIds) {
-            List<LinkUpdate> linkUpdates = linksRepository.getAllLinks(chatId);
+            List<LinkUpdate> linkUpdates = tgChatRepository.getAllLinks(chatId);
 
             for (LinkUpdate link : linkUpdates) {
                 if (link.url().contains(GITHUB_LINK_REGEX)) {
@@ -62,24 +67,23 @@ public class LinkCheckScheduler {
 
         String owner = parts[0];
         String repo = parts[1];
+        Instant now = Instant.now();
+
+        // Инициализируем время первой проверки для ссылки
+        firstCheckTime.putIfAbsent(link, now);
 
         // Проверка Issues
         gitHubClient.fetchIssues(owner, repo).subscribe(issues -> {
             for (GitHubIssueResponse issue : issues) {
-                if (issue.pullRequest() != null) {
-                    continue;
-                }
+                if (issue.pullRequest() != null) continue;
 
-                String messageKey = "issue:" + issue.id();
-                String message = formatGitHubMessage("Issue", issue.title(),
-                    issue.user().login(), issue.createdAt(), issue.body(),
-                    issue.state(), issue.htmlUrl());
-
-                if (!initializedLinks.contains(link)) {
-                    lastSeenUpdates.put(messageKey, message);
-                } else if (!message.equals(lastSeenUpdates.get(messageKey))) {
+                Instant updatedAt = Instant.parse(issue.updatedAt());
+                if (shouldProcessUpdate(link, issue.id(), updatedAt)) {
+                    String message = formatGitHubMessage("Issue", issue.title(),
+                            issue.user().login(), issue.updatedAt(), issue.body(),
+                            issue.state(), issue.htmlUrl());
                     sendUpdate(link, message, List.of(chatId));
-                    lastSeenUpdates.put(messageKey, message);
+                    markAsProcessed(link, issue.id());
                 }
             }
         });
@@ -87,24 +91,33 @@ public class LinkCheckScheduler {
         // Проверка Pull Requests
         gitHubClient.fetchPullRequests(owner, repo).subscribe(pullRequests -> {
             for (GitHubPullRequestResponse pr : pullRequests) {
-                String messageKey = "pr:" + pr.id();
-                String message = formatGitHubMessage("Pull Request", pr.title(),
-                    pr.user().login(), pr.createdAt(), pr.body(),
-                    pr.state(), pr.htmlUrl());
-
-                if (!initializedLinks.contains(link)) {
-                    lastSeenUpdates.put(messageKey, message);
-                } else if (!message.equals(lastSeenUpdates.get(messageKey))) {
+                Instant updatedAt = Instant.parse(pr.updatedAt());
+                if (shouldProcessUpdate(link, pr.id(), updatedAt)) {
+                    String message = formatGitHubMessage("Pull Request", pr.title(),
+                            pr.user().login(), pr.updatedAt(), pr.body(),
+                            pr.state(), pr.htmlUrl());
                     sendUpdate(link, message, List.of(chatId));
-                    lastSeenUpdates.put(messageKey, message);
+                    markAsProcessed(link, pr.id());
                 }
             }
         });
+    }
 
-        if (!initializedLinks.contains(link)) {
-            initializedLinks.add(link);
-            log.info("Инициализирована проверка ссылки: {}", link);
-        }
+    private boolean shouldProcessUpdate(String link, Long entityId, Instant updatedAt) {
+        // Проверяем появилось ли обновление после начала отслеживания
+        boolean isNewAfterStart = updatedAt.isAfter(firstCheckTime.get(link));
+
+        // Проверяем не обрабатывали ли мы уже это обновление
+        boolean notProcessedYet = !processedEntities
+            .getOrDefault(link, Collections.emptySet())
+            .contains(entityId);
+
+        return isNewAfterStart && notProcessedYet;
+    }
+
+    private void markAsProcessed(String link, Long entityId) {
+        processedEntities.computeIfAbsent(link, k -> ConcurrentHashMap.newKeySet())
+                       .add(entityId);
     }
 
 
