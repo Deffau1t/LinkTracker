@@ -32,8 +32,11 @@ public class LinkUpdate {
     private String url;
 
     @Column
-    private String description;
+    private List<String> tags;
 
-    @Transient  // Не хранится в БД, но используется в коде
+    @Column
+    private List<String> filters;
+
+    @Transient
     private List<Long> tgChatIds;
 }

@@ -4,11 +4,16 @@ services:
     container_name: scrapper_postgres
     restart: always
     environment:
-      POSTGRES_DB: LinkTracker
+      POSTGRES_DB: LinkTracker2
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 1
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d LinkTracker2"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   liquibase-migrations:
     image: liquibase/liquibase:4.29
@@ -25,9 +30,8 @@ services:
     command:
       - --searchPath=/liquibase/changelog
       - --changelog-file=db.changelog-master.xml
-      - --url=jdbc:postgresql://postgres:5432/LinkTracker
+      - --url=jdbc:postgresql://postgres:5432/LinkTracker2
       - --username=postgres
       - --password=1
       - --classpath=/liquibase/lib/postgresql.jar
       - update
-

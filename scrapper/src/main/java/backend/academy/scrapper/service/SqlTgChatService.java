@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import java.sql.Array;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -28,13 +31,31 @@ public class SqlTgChatService implements TgChatService{
 
     @Override
     public List<LinkUpdate> getAllLinks(Long chatId) {
-        String sql = "SELECT l.id, l.url, l.description FROM links l JOIN link_tg_chat lt ON l.id = lt.link_id WHERE lt.tg_chat_id = ?";
-        return jdbcTemplate.query(sql, (rs, _) -> new LinkUpdate(
-            rs.getLong("id"),
-            rs.getString("url"),
-            rs.getString("description"),
-            List.of(chatId)
-        ), chatId);
+        String sql = "SELECT l.id, l.url, l.tags, l.filters " +
+                 "FROM links l JOIN link_tg_chat lt ON l.id = lt.link_id " +
+                 "WHERE lt.tg_chat_id = ?";
+
+        return jdbcTemplate.query(sql, (rs, _) -> {
+            // Преобразуем массивы из результатов в списки
+            Array tagsArray = rs.getArray("tags");
+            Array filtersArray = rs.getArray("filters");
+
+            List<String> tagsList = tagsArray != null ?
+                Arrays.asList((String[]) tagsArray.getArray()) :
+                Collections.emptyList();
+
+            List<String> filtersList = filtersArray != null ?
+                Arrays.asList((String[]) filtersArray.getArray()) :
+                Collections.emptyList();
+
+            return LinkUpdate.builder()
+                .id(rs.getLong("id"))
+                .url(rs.getString("url"))
+                .tags(tagsList)
+                .filters(filtersList)
+                .tgChatIds(List.of(chatId))
+                .build();
+        }, chatId);
     }
 
     @Override

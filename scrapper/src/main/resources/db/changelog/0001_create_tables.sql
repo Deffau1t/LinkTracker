@@ -7,7 +7,8 @@ CREATE TABLE IF NOT EXISTS tg_chats (
 CREATE TABLE IF NOT EXISTS links (
     id BIGSERIAL PRIMARY KEY,
     url TEXT NOT NULL UNIQUE,
-    description TEXT
+    tags TEXT[],
+    filters TEXT[]
 );
 
 -- Таблица для связи ссылок и чатов

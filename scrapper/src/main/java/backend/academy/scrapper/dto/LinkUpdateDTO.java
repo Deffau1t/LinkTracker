@@ -20,13 +20,19 @@ import lombok.Setter;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class LinkUpdateDTO {
     @JsonProperty("id")
-    private Long id = 0L;
+    private Long id;
 
     @JsonProperty("url")
     private String url;
 
     @JsonProperty("description")
     private String description;
+
+    @JsonProperty("tags")
+    private List<String> tags;
+
+    @JsonProperty("filters")
+    private List<String> filters;
 
     @JsonProperty("tg_chat_ids")
     private List<Long> tgChatIds;

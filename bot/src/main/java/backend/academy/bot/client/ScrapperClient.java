@@ -105,7 +105,7 @@ public class ScrapperClient {
             log.error("🚨 Ошибка при получении ссылок: {}", e.getMessage());
         }
 
-        return List.of(); // Если ошибка — вернуть пустой список
+        return List.of();
     }
 
     /**

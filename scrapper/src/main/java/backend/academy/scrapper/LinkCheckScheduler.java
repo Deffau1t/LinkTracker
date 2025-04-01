@@ -5,7 +5,9 @@ import backend.academy.scrapper.client.GitHubClient;
 import backend.academy.scrapper.client.StackOverflowClient;
 import backend.academy.scrapper.dto.GitHubIssueResponse;
 import backend.academy.scrapper.dto.GitHubPullRequestResponse;
+import backend.academy.scrapper.dto.LinkUpdateDTO;
 import backend.academy.scrapper.entity.LinkUpdate;
+import backend.academy.scrapper.repository.LinksRepository;
 import backend.academy.scrapper.repository.TgChatRepository;
 import java.time.Instant;
 import java.util.Collections;
@@ -29,15 +31,13 @@ public class LinkCheckScheduler {
     private final StackOverflowClient stackOverflowClient;
     private final BotClient botClient;
     private final TgChatRepository tgChatRepository;
+    private final LinksRepository linksRepository;
 
     private static final int FIXED_RATE = 60000;
     private final Map<String, String> lastUpdates = new ConcurrentHashMap<>();
 
     private static final String GITHUB_LINK_REGEX = "github.com";
     private static final String STACKOVERFLOW_LINK_REGEX = "stackoverflow.com";
-
-    private final Map<String, String> lastSeenUpdates = new ConcurrentHashMap<>();
-    private final Set<String> initializedLinks = ConcurrentHashMap.newKeySet();
 
     private final Map<String, Instant> firstCheckTime = new ConcurrentHashMap<>();
     private final Map<String, Set<Long>> processedEntities = new ConcurrentHashMap<>();
@@ -153,13 +153,25 @@ public class LinkCheckScheduler {
         }
     }
 
-    private void sendUpdate(final String url, final String description, List<Long> chatIds) {
+    private void sendUpdate(final String url,
+                            final String updateContent,
+                            List<Long> chatIds) {
         if (!chatIds.isEmpty()) {
-            botClient.sendUpdate(LinkUpdate.builder()
-                    .url(url)
-                    .description(description)
-                    .tgChatIds(chatIds)
-                    .build());
+            // Получаем текущие теги и фильтры для ссылки
+            LinkUpdate linkUpdate = linksRepository.findByUrl(url)
+                .orElse(LinkUpdate.builder().url(url).build());
+
+            // Создаем DTO с обновленными данными
+            LinkUpdateDTO dto = LinkUpdateDTO.builder()
+                .id(linkUpdate.id())
+                .url(url)
+                .description(updateContent)
+                .tags(linkUpdate.tags())
+                .filters(linkUpdate.filters())
+                .tgChatIds(chatIds)
+                .build();
+
+            botClient.sendUpdate(dto);
         }
     }
 

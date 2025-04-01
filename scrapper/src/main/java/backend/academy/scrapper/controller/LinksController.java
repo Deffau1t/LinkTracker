@@ -70,6 +70,8 @@ public class LinksController {
             .map(link -> LinkResponse.builder()
                 .id(link.id())
                 .url(link.url())
+                .tags(link.tags())
+                .filters(link.filters())
                 .build())
             .collect(Collectors.toList());
 

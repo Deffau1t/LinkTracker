@@ -40,18 +40,18 @@ public class TgChatController {
     public ResponseEntity<?> registerChat(
         final @PathVariable("id") @Min(1) Long id
     ) {
-//        if (tgChatService.isChatsRegistered(id)) {
-//            return ResponseEntity.badRequest().body(
-//                ApiErrorResponse.builder()
-//                    .description("Чат уже зарегистрирован")
-//                    .code("400")
-//                    .exceptionName("Bad Request")
-//                    .exceptionMessage(
-//                        "Чат уже зарегистрирован или введён некорректный id"
-//                    )
-//                    .build()
-//            );
-//        }
+        if (tgChatService.isChatRegistered(id)) {
+            return ResponseEntity.badRequest().body(
+                ApiErrorResponse.builder()
+                    .description("Чат уже зарегистрирован")
+                    .code("400")
+                    .exceptionName("Bad Request")
+                    .exceptionMessage(
+                        "Чат уже зарегистрирован или введён некорректный id"
+                    )
+                    .build()
+            );
+        }
 
         tgChatService.registerChat(id);
         return ResponseEntity.ok(

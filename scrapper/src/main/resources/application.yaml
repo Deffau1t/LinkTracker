@@ -17,7 +17,7 @@ spring:
   application:
     name: Scrapper
   datasource:
-    url: jdbc:postgresql://localhost:5432/LinkTracker
+    url: jdbc:postgresql://localhost:5432/LinkTracker2
     username: postgres
     password: 1
     driver-class-name: org.postgresql.Driver
@@ -28,7 +28,7 @@ spring:
     change-log: classpath:/db/changelog/db.changelog-master.xml
     user: postgres
     password: 1
-    url: jdbc:postgresql://localhost:5432/LinkTracker
+    url: jdbc:postgresql://localhost:5432/LinkTracker2
     default-schema: public
   jpa:
     hibernate:

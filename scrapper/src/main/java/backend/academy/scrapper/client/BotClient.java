@@ -40,18 +40,21 @@ public class BotClient {
      * sendUpdate - Метод для отправки обновления в бот.
      * @param update - Обновление для отправки.
      */
-    public void sendUpdate(final LinkUpdate update) {
+    public void sendUpdate(final LinkUpdateDTO update) {
         String url = botBaseUrl + "/updates";
 
-        if (update == null || update.url() == null || update.description() == null) {
-            log.error("Ошибка: некорректные данные для отправки");
+        if (update == null || update.url() == null || update.tgChatIds() == null) {
+            log.error("Invalid update data: {}", update);
             return;
         }
 
         try {
             LinkUpdateDTO dto = LinkUpdateDTO.builder()
+                .id(update.id())
                 .url(update.url())
                 .description(update.description())
+                .tags(update.tags())
+                .filters(update.filters())
                 .tgChatIds(update.tgChatIds())
                 .build();
 

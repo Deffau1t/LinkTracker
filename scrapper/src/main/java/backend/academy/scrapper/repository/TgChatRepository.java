@@ -18,7 +18,7 @@ public interface TgChatRepository extends JpaRepository<LinkUpdate, Long> {
     @Query(value = "DELETE FROM tg_chats WHERE id = ?1", nativeQuery = true)
     void deleteChat(Long chatId);
 
-    @Query(value = "SELECT l.id, l.url, l.description FROM links l JOIN link_tg_chat lt ON l.id = lt.link_id WHERE lt.tg_chat_id = ?1", nativeQuery = true)
+    @Query(value = "SELECT l.id, l.url, l.tags, l.filters FROM links l JOIN link_tg_chat lt ON l.id = lt.link_id WHERE lt.tg_chat_id = ?1", nativeQuery = true)
     List<LinkUpdate> getAllLinks(Long chatId);
 
     @Query(value = "SELECT id from tg_chats", nativeQuery = true)

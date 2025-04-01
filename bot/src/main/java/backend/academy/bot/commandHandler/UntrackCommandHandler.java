@@ -3,20 +3,17 @@ package backend.academy.bot.commandHandler;
 import backend.academy.bot.client.ScrapperClient;
 import backend.academy.bot.model.BotState;
 import backend.academy.bot.service.LinkTrackerBot;
+import lombok.AllArgsConstructor;
 import java.util.Map;
 
 /**
  * UntrackCommandHandler - класс, который обрабатывает команду "/untrack".
  */
+
+@AllArgsConstructor
 public class UntrackCommandHandler implements CommandHandler {
     private final ScrapperClient scrapperClient;
     private final Map<Long, BotState> userStates;
-
-    public UntrackCommandHandler(ScrapperClient scrapperClient,
-                                 Map<Long, BotState> userStates) {
-        this.scrapperClient = scrapperClient;
-        this.userStates = userStates;
-    }
 
     @Override
     public String command() {
