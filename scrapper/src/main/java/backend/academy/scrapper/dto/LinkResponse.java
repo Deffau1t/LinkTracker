@@ -3,6 +3,7 @@ package backend.academy.scrapper.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -13,6 +14,7 @@ import lombok.Getter;
 @Getter
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@AllArgsConstructor
 public class LinkResponse {
     /**
      * Id - идентификатор ссылки.

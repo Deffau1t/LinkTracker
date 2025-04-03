@@ -193,14 +193,14 @@ public class LinkCheckScheduler {
         return null;
     }
 
-    private String formatGitHubMessage(String type, String title, String author, String date, String body, String state, String url) {
+    String formatGitHubMessage(String type, String title, String author, String date, String body, String state, String url) {
         return String.format("[%s] %s\nАвтор: %s\nДата: %s\n%s%sОписание: %s", type, title, author, date,
                 (state != null ? "Статус: " + state + "\n" : ""),
                 (url != null ? "Ссылка: " + url + "\n" : ""),
                 body != null ? body.substring(0, Math.min(body.length(), 200)) : "Без описания");
     }
 
-    private String formatStackOverflowMessage(String type, String questionTitle, String user, String date, String body) {
+    String formatStackOverflowMessage(String type, String questionTitle, String user, String date, String body) {
         return String.format("[%s] Вопрос: %s\nАвтор: %s\nДата: %s\nПревью: %s", type, questionTitle, user, date,
                 body != null ? body.substring(0, Math.min(body.length(), 200)) : "Без текста");
     }

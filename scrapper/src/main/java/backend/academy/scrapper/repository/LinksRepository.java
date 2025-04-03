@@ -14,7 +14,7 @@ public interface LinksRepository extends JpaRepository<LinkUpdate, Long> {
     @Transactional
     @Query(value = """
         INSERT INTO links (url, tags, filters)
-        VALUES (:url, CAST(:tags AS text[]), CAST(:filters AS text[]))
+        VALUES (:url, array[:tags], array[:filters])
         ON CONFLICT (url) DO NOTHING;
 
         INSERT INTO link_tg_chat (link_id, tg_chat_id)
