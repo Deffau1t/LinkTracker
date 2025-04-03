@@ -52,7 +52,8 @@ public class LinkTrackerBot {
     /**
      * Команды бота - хранит обработчики команд.
      */
-    private final Map<String, CommandHandler> commandHandlers = new HashMap<>();
+    private final Map<String, CommandHandler> commandHandlers =
+        new HashMap<>();
 
     /**
      * LinkTrackerBot - конструктор класса.
@@ -65,12 +66,20 @@ public class LinkTrackerBot {
         this.scrapperBotClient = scrapperClient;
         this.bot = new TelegramBot(botConfig.telegramToken());
 
-        commandHandlers.put("/start", new StartCommandHandler(scrapperBotClient));
+        commandHandlers.put("/start", new StartCommandHandler(
+            scrapperBotClient)
+        );
         commandHandlers.put("/help", new HelpCommandHandler());
-        commandHandlers.put("/track", new TrackCommandHandler(userStates));
+
+        commandHandlers.put("/track", new TrackCommandHandler(
+            userStates)
+        );
         commandHandlers.put("/untrack", new UntrackCommandHandler(
-            scrapperClient, userStates));
-        commandHandlers.put("/list", new ListCommandHandler(scrapperBotClient));
+            userStates)
+        );
+        commandHandlers.put("/list", new ListCommandHandler(
+            scrapperBotClient)
+        );
 
         this.bot.setUpdatesListener(
             updates -> {
@@ -112,16 +121,26 @@ public class LinkTrackerBot {
      */
 
     private void handleCommand(final Long chatId, final String text) {
-        Optional<CommandHandler> handlerOpt = commandHandlers.values().stream()
+        Optional<CommandHandler> handlerOpt = commandHandlers
+            .values()
+            .stream()
                 .filter(handler -> text.startsWith(handler.command()))
                 .findFirst();
 
         handlerOpt.ifPresentOrElse(
                 handler -> handler.execute(chatId, text, this),
-                () -> sendMessage(chatId, "Неизвестная команда. Введите /help для списка команд.")
+                () -> sendMessage(
+                    chatId,
+                    "Неизвестная команда. Введите /help для списка команд."
+                )
         );
     }
 
+    /**
+     * handleLink - метод, который обрабатывает команду /track.
+     * @param chatId - идентификатор чата.
+     * @param text - текст сообщения.
+     */
     private void handleLink(final Long chatId, final String text) {
         userLinks.put(chatId, text);
         userStates.put(chatId, BotState.WAITING_FOR_TAGS);
@@ -131,6 +150,11 @@ public class LinkTrackerBot {
         );
     }
 
+    /**
+     * handleUntrack - метод, который обрабатывает команду /untrack.
+     * @param chatId - идентификатор чата.
+     * @param text - текст сообщения.
+     */
     private void handleUntrack(final Long chatId, final String text) {
         if (scrapperBotClient.untrackLink(chatId, text)) {
             sendMessage(
@@ -146,7 +170,11 @@ public class LinkTrackerBot {
         userStates.put(chatId, BotState.IDLE);
     }
 
-
+    /**
+     * handleTags - метод, который обрабатывает команду /track.
+     * @param chatId - идентификатор чата.
+     * @param text - текст сообщения.
+     */
     private void handleTags(final Long chatId, final String text) {
         if (!text.equals("-")) {
             userTags.put(chatId, text);
@@ -158,6 +186,11 @@ public class LinkTrackerBot {
         );
     }
 
+    /**
+     * handleFilters - метод, который обрабатывает команду /track.
+     * @param chatId - идентификатор чата.
+     * @param text - текст сообщения.
+     */
     private void handleFilters(final Long chatId, final String text) {
         String link = userLinks.get(chatId);
         String tags = userTags.getOrDefault(chatId, "");

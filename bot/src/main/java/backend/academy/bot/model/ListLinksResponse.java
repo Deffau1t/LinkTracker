@@ -8,20 +8,25 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * ListLinksResponse - список ссылок.
+ */
+
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ListLinksResponse {
+    /**
+     * links - список ссылок.
+     */
     @JsonProperty("links")
     private List<LinkResponse> links;
 
+    /**
+     * size - размер списка.
+     */
     @JsonProperty("size")
     private int size;
-
-    public void setLinks(List<LinkResponse> links) {
-        this.links = links;
-        this.size = (links != null) ? links.size() : 0;
-    }
 }

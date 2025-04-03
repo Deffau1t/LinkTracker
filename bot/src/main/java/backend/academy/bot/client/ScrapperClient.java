@@ -49,13 +49,13 @@ public class ScrapperClient {
      * @param link - Ссылка для отслеживания.
      * @param tags - Теги для отслеживания.
      * @param filters - Фильтры для отслеживания.
+     * @return - true, если запрос успешно отправлен, иначе false.
      */
 
     public boolean trackLink(final Long chatId,
                           final String link,
                           final String tags,
                           final String filters) {
-        registerChatIfNeeded(chatId);
 
         String url = scrapperBaseUrl + "/links";
         HttpHeaders headers = createHeaders(chatId);
@@ -66,15 +66,26 @@ public class ScrapperClient {
             filters.isEmpty() ? List.of() : List.of(filters.split(" "))
         );
 
-        HttpEntity<TrackLinkRequest> request = new HttpEntity<>(requestBody, headers);
+        HttpEntity<TrackLinkRequest> request = new HttpEntity<>(
+            requestBody,
+            headers
+        );
 
         try {
-            ResponseEntity<String> response = httpClient.postForEntity(url, request, String.class);
+            ResponseEntity<String> response = httpClient.postForEntity(
+                url,
+                request,
+                String.class
+            );
             if (response.getStatusCode().is2xxSuccessful()) {
                 log.info("✅ Ссылка успешно добавлена в scrapper!");
                 return true;
             } else {
-                log.error("❌ Ошибка сервера: {} - {}", response.getStatusCode(), response.getBody());
+                log.error(
+                    "❌ Ошибка сервера: {} - {}",
+                    response.getStatusCode(),
+                    response.getBody()
+                );
             }
         } catch (Exception e) {
             log.error("🚨 Ошибка при отправке запроса: {}", e.getMessage());
@@ -82,6 +93,12 @@ public class ScrapperClient {
         return false;
     }
 
+    /**
+     * getTrackedLinks - Отправляет запрос на получение списка
+     * отслеживаемых ссылок.
+     * @param chatId - ID чата в Telegram.
+     * @return - Список отслеживаемых ссылок.
+     */
     public List<LinkResponse> getTrackedLinks(final Long chatId) {
         String url = scrapperBaseUrl + "/links";
         HttpHeaders headers = createHeaders(chatId);
@@ -95,14 +112,24 @@ public class ScrapperClient {
                 ListLinksResponse.class
             );
 
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                log.info("✅ Получены отслеживаемые ссылки для чата {}", chatId);
+            if (response.getStatusCode().is2xxSuccessful()
+                && response.getBody() != null
+            ) {
+                log.info(
+                    "✅ Получены отслеживаемые ссылки для чата {}",
+                    chatId
+                );
                 return response.getBody().links();
             } else {
-                log.warn("⚠️ Не удалось получить ссылки для чата {}", chatId);
+                log.warn(
+                    "⚠️ Не удалось получить ссылки для чата {}",
+                    chatId
+                );
             }
         } catch (Exception e) {
-            log.error("🚨 Ошибка при получении ссылок: {}", e.getMessage());
+            log.error(
+                "🚨 Ошибка при получении ссылок: {}", e.getMessage()
+            );
         }
 
         return List.of();
@@ -141,6 +168,7 @@ public class ScrapperClient {
      * untrackLink - Отправляет запрос на удаление ссылки из scrapper.
      * @param chatId - ID чата в Telegram.
      * @param link - Ссылка для удаления.
+     * @return - true, если запрос успешно отправлен, иначе false.
      */
 
     public boolean untrackLink(final Long chatId, final String link) {
@@ -148,7 +176,10 @@ public class ScrapperClient {
         HttpHeaders headers = createHeaders(chatId);
 
         UntrackLinkRequest requestBody = new UntrackLinkRequest(link);
-        HttpEntity<UntrackLinkRequest> request = new HttpEntity<>(requestBody, headers);
+        HttpEntity<UntrackLinkRequest> request = new HttpEntity<>(
+            requestBody,
+            headers
+        );
 
         try {
             ResponseEntity<String> response = httpClient.exchange(
@@ -162,7 +193,11 @@ public class ScrapperClient {
                 log.info("✅ Ссылка успешно удалена в scrapper.");
                 return true;
             } else {
-                log.error("❌ Ошибка при удалении: {} - {}", response.getStatusCode(), response.getBody());
+                log.error(
+                    "❌ Ошибка при удалении: {} - {}",
+                    response.getStatusCode(),
+                    response.getBody()
+                );
             }
         } catch (Exception e) {
             log.error("🚨 Ошибка при удалении ссылки: {}", e.getMessage());
@@ -170,6 +205,11 @@ public class ScrapperClient {
         return false;
     }
 
+    /**
+     * createHeaders - Создает HTTP заголовки для запросов.
+     * @param chatId - ID чата в Telegram.
+     * @return - HTTP заголовки.
+     */
     private HttpHeaders createHeaders(final Long chatId) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

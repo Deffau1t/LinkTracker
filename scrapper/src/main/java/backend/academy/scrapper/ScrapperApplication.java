@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableConfigurationProperties({ScrapperConfig.class})
 @EnableScheduling
+@SuppressWarnings("HideUtilityClassConstructor")
 public class ScrapperApplication {
     /**
      * main method.

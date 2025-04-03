@@ -3,8 +3,12 @@ package backend.academy.scrapper.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
-
 import java.time.OffsetDateTime;
+
+/**
+ * StackOverflowQuestionResponse - для работы
+ * с данными вопроса на stackoverflow.com.
+ */
 
 @Getter
 @Setter

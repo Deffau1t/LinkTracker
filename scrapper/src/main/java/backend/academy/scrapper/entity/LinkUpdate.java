@@ -1,7 +1,5 @@
 package backend.academy.scrapper.entity;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -16,6 +14,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * LinkUpdate - модель базы данных для хранения ссылок и их обновлений.
+ */
+
 @Entity
 @Table(name = "links")
 @Getter
@@ -24,19 +26,34 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class LinkUpdate {
+    /**
+     * Id - уникальный идентификатор ссылки.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * Url - ссылка на сайт.
+     */
     @Column(nullable = false, unique = true)
     private String url;
 
+    /**
+     * Tags - теги для ссылки.
+     */
     @Column
     private List<String> tags;
 
+    /**
+     * Filters - фильтры для ссылки.
+     */
     @Column
     private List<String> filters;
 
+    /**
+     * tgChatIds - список ID чатов для уведомлений.
+     */
     @Transient
     private List<Long> tgChatIds;
 }

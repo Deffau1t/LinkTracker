@@ -1,3 +1,7 @@
 package backend.academy.bot.model;
 
-public record UntrackLinkRequest(String link) {}
+/**
+ * UntrackLinkRequest - DTO для запроса на отслеживание ссылки.
+ * @param link - Ссылка для отслеживания.
+ */
+public record UntrackLinkRequest(String link) { }

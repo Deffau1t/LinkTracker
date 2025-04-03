@@ -9,7 +9,19 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * LinksRepository - Репозиторий
+ * для работы с таблицей links и связанными таблицами.
+ */
+
 public interface LinksRepository extends JpaRepository<LinkUpdate, Long> {
+    /**
+     * Метод для добавления ссылки в таблицу links и связанных таблиц.
+     * @param chatId - идентификатор чата
+     * @param url - ссылка на сайт
+     * @param tags - список тегов
+     * @param filters - список фильтров
+     */
     @Modifying
     @Transactional
     @Query(value = """
@@ -28,11 +40,25 @@ public interface LinksRepository extends JpaRepository<LinkUpdate, Long> {
         @Param("filters") List<String> filters
     );
 
+    /**
+     * Метод для удаления ссылки из таблицы links и связанных таблиц.
+     * @param chatId - идентификатор чата
+     * @param url - ссылка на сайт
+     */
     @Modifying
     @Transactional
-    @Query(value = "DELETE FROM link_tg_chat WHERE tg_chat_id = ?1 AND link_id = (SELECT id FROM links WHERE url = ?2)", nativeQuery = true)
+    @Query(value =
+        "DELETE FROM link_tg_chat WHERE tg_chat_id = ?1 AND"
+            + " link_id = (SELECT id FROM links WHERE url = ?2)",
+        nativeQuery = true
+    )
     void removeLink(Long chatId, String url);
 
+    /**
+     * Метод для получения ссылки из таблицы links и связанных таблиц.
+     * @param url - ссылка на сайт
+     * @return ссылка из таблицы links и связанных таблиц.
+     */
     @Query("SELECT l FROM LinkUpdate l WHERE l.url = :url")
     Optional<LinkUpdate> findByUrl(String url);
 }

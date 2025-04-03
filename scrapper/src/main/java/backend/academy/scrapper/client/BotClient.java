@@ -1,8 +1,6 @@
 package backend.academy.scrapper.client;
 
 import backend.academy.scrapper.dto.LinkUpdateDTO;
-import backend.academy.scrapper.entity.LinkUpdate;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +41,8 @@ public class BotClient {
     public void sendUpdate(final LinkUpdateDTO update) {
         String url = botBaseUrl + "/updates";
 
-        if (update == null || update.url() == null || update.tgChatIds() == null) {
+        if (update == null || update.url() == null
+            || update.tgChatIds() == null) {
             log.error("Invalid update data: {}", update);
             return;
         }
@@ -60,7 +59,10 @@ public class BotClient {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<LinkUpdateDTO> request = new HttpEntity<>(dto, headers);
+            HttpEntity<LinkUpdateDTO> request = new HttpEntity<>(
+                dto,
+                headers
+            );
 
             ResponseEntity<String> response = restTemplate.postForEntity(
                 url, request, String.class
@@ -68,7 +70,11 @@ public class BotClient {
 
             log.info("Ответ от бота: {}", response.getStatusCode());
         } catch (HttpClientErrorException e) {
-            log.error("HTTP ошибка {}: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            log.error(
+                "HTTP ошибка {}: {}",
+                e.getStatusCode(),
+                e.getResponseBodyAsString()
+            );
         } catch (Exception e) {
             log.error("Ошибка отправки: {}", e.getMessage());
         }

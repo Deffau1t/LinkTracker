@@ -11,8 +11,6 @@ import backend.academy.scrapper.service.TgChatService;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -55,7 +53,7 @@ public class LinksController {
      */
     @GetMapping
     public ResponseEntity<?> getLinks(
-        final @RequestHeader("Tg-Chat-Id") Long chatId) throws JsonProcessingException {
+        final @RequestHeader("Tg-Chat-Id") Long chatId) {
         if (!tgChatService.isChatRegistered(chatId)) {
             ApiErrorResponse apiErrorResponse = ApiErrorResponse.builder()
                 .code("400")

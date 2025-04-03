@@ -90,13 +90,30 @@ public class GitHubClient {
                 .collectList();
     }
 
-    public Mono<List<GitHubPullRequestResponse>> fetchPullRequests(String owner, String repo) {
+    /**
+     * Метод для получения списка коммитов в репозитории на GitHub.
+     * @param owner - владелец репозитория.
+     * @param repo - название репозитория.
+     * @return - Mono с объектом GitHubCommitResponse.
+     */
+    public Mono<List<GitHubPullRequestResponse>> fetchPullRequests(
+        final String owner,
+        final String repo
+    ) {
         return webClient.get()
             .uri("/repos/{owner}/{repo}/pulls?state=all", owner, repo)
             .retrieve()
             .bodyToFlux(GitHubPullRequestResponse.class)
             .collectList()
-            .doOnNext(prs -> log.info("Found {} PRs for {}/{}", prs.size(), owner, repo))
-            .doOnError(e -> log.error("GitHub PRs fetch error: {}", e.getMessage()));
+            .doOnNext(prs -> log.info(
+                "Found {} PRs for {}/{}",
+                prs.size(),
+                owner,
+                repo)
+            )
+            .doOnError(e -> log.error(
+                "GitHub PRs fetch error: {}",
+                e.getMessage())
+            );
     }
 }

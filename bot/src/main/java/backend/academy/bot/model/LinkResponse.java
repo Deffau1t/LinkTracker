@@ -33,8 +33,17 @@ public class LinkResponse {
      */
     private List<String> filters;
 
+    /**
+     * toString - метод для получения строки с данными ссылки.
+     * @return - строка с данными ссылки.
+     */
     @Override
     public String toString() {
-        return String.format("URL: %s | Tags: %s | Filters: %s \n", url, tags, filters);
+        return String.format(
+            "URL: %s | Tags: %s | Filters: %s \n",
+            url,
+            tags,
+            filters
+        );
     }
 }

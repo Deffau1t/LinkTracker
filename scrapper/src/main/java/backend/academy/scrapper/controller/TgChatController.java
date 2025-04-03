@@ -81,7 +81,7 @@ public class TgChatController {
             );
         }
 
-        if (5 > id) {
+        if (tgChatService.isChatRegistered(id)) {
             tgChatService.deleteChat(id);
             return ResponseEntity.ok(
                 Map.of("code",
