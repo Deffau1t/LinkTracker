@@ -32,6 +32,10 @@ TELEGRAM_TOKEN=your_telegram_bot_token
 SCRAPPER_BASE_URL=http://localhost:8081
 GITHUB_TOKEN=your_github_token
 SO_KEY=your_stackoverflow_key
+POSTGRES_DB=your_postgres_db
+POSTGRES_URL=your_postgres_url
+POSTGRES_USERNAME=your_postgres_username
+POSTGRES_PASSWORD=your_postgres_password
 ```
 
 ### 🔹 **3. Сборка проекта**
