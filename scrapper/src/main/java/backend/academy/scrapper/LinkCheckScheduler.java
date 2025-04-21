@@ -251,8 +251,7 @@ public class LinkCheckScheduler {
             });
         } catch (Exception e) {
             log.error(
-                "🚨 Ошибка при проверке обновлений для {}: {}",
-                link,
+                "Ошибка при проверке обновлений для {}: {}", link,
                 e.getMessage(),
                 e
             );
