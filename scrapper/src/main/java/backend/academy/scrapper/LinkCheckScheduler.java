@@ -91,11 +91,11 @@ public class LinkCheckScheduler {
     public void checkForUpdates() {
         log.info("🔍 Запуск проверки обновлений...");
 
-        List<Long> chatIds = tgChatRepository.getAllChatIds();
+        List<Long> chatIds = tgChatRepository.findAllChatIds();
 
         for (Long chatId : chatIds) {
             List<LinkUpdate> linkUpdates
-                = tgChatRepository.getAllLinks(chatId);
+                = tgChatRepository.findAllLinksByChatId(chatId);
 
             for (LinkUpdate link : linkUpdates) {
                 if (link.url().contains(GITHUB_LINK_REGEX)) {

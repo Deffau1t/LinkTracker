@@ -1,65 +1,33 @@
 package backend.academy.scrapper.repository;
 
 import backend.academy.scrapper.entity.LinkUpdate;
+import backend.academy.scrapper.entity.TgChat;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
 
 /**
  * TgChatRepository - Репозиторий для работы с таблицей tg_chats.
  */
+public interface TgChatRepository extends JpaRepository<TgChat, Long> {
 
-public interface TgChatRepository extends JpaRepository<LinkUpdate, Long> {
-    /**
-     * Метод для регистрации чата в таблице tg_chats.
-     * @param chatId - идентификатор чата
-     */
+    @Query(value = "SELECT l.* FROM links l JOIN link_tg_chat ltc ON l.id = ltc.link_id WHERE ltc.tg_chat_id = :chatId", nativeQuery = true)
+    List<LinkUpdate> findAllLinksByChatId(Long chatId);
+
+    @Query("SELECT t.id FROM TgChat t")
+    List<Long> findAllChatIds();
+
+    boolean existsById(Long chatId);
+
     @Modifying
     @Transactional
-    @Query(value = "INSERT INTO tg_chats (id) VALUES (?1)"
-        + " ON CONFLICT DO NOTHING",
-        nativeQuery = true
-    )
-    void registerChat(Long chatId);
+    @Query(value = "INSERT INTO link_tg_chat (link_id, tg_chat_id) VALUES (:linkId, :chatId) ON CONFLICT DO NOTHING", nativeQuery = true)
+    void insertLinkChatRelation(Long linkId, Long chatId);
 
-    /**
-     * Метод для удаления чата из таблицы tg_chats.
-     * @param chatId - идентификатор чата
-     */
     @Modifying
     @Transactional
-    @Query(value = "DELETE FROM tg_chats WHERE id = ?1", nativeQuery = true)
-    void deleteChat(Long chatId);
-
-    /**
-     * Метод для получения списка ссылок из таблицы links
-     * и связанных таблиц по идентификатору чата.
-     * @param chatId - идентификатор чата
-     * @return список ссылок из таблицы links и связанных таблиц.
-     */
-    @Query(value = "SELECT l.id, l.url, l.tags, l.filters"
-        + " FROM links l JOIN link_tg_chat lt ON"
-        + " l.id = lt.link_id WHERE lt.tg_chat_id = ?1",
-        nativeQuery = true
-    )
-    List<LinkUpdate> getAllLinks(Long chatId);
-
-    /**
-     * Метод для получения списка идентификаторов чатов из таблицы tg_chats.
-     * @return список идентификаторов чатов из таблицы tg_chats.
-     */
-    @Query(value = "SELECT id from tg_chats", nativeQuery = true)
-    List<Long> getAllChatIds();
-
-    /**
-     * Метод для проверки регистрации чата в базе данных.
-     * @param chatId - идентификатор чата
-     * @return true, если чат зарегистрирован в базе данных, иначе false
-     */
-    @Query(value = "SELECT EXISTS(SELECT 1 FROM tg_chats WHERE id = ?1)",
-        nativeQuery = true
-    )
-    boolean existsChatById(Long chatId);
+    @Query(value = "DELETE FROM link_tg_chat WHERE link_id = :linkId AND tg_chat_id = :chatId", nativeQuery = true)
+    void deleteLinkChatRelation(Long linkId, Long chatId);
 }
