@@ -3,6 +3,7 @@ package backend.academy.scrapper.repository;
 import backend.academy.scrapper.entity.LinkUpdate;
 import backend.academy.scrapper.entity.TgChat;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -13,21 +14,51 @@ import org.springframework.transaction.annotation.Transactional;
  */
 public interface TgChatRepository extends JpaRepository<TgChat, Long> {
 
-    @Query(value = "SELECT l.* FROM links l JOIN link_tg_chat ltc ON l.id = ltc.link_id WHERE ltc.tg_chat_id = :chatId", nativeQuery = true)
+    /**
+     * Получить все ссылки для чата по его идентификатору.
+     *
+     * @param chatId - идентификатор чата
+     * @return - список ссылок
+     */
+    @Query(value = "SELECT l.* FROM links l JOIN link_tg_chat ltc"
+        + " ON l.id = ltc.link_id WHERE ltc.tg_chat_id = :chatId",
+        nativeQuery = true)
     List<LinkUpdate> findAllLinksByChatId(Long chatId);
 
+    /**
+     * Получить все идентификаторы чатов.
+     * @return - список идентификаторов чатов
+     */
     @Query("SELECT t.id FROM TgChat t")
     List<Long> findAllChatIds();
 
-    boolean existsById(Long chatId);
+    /**
+     * Проверяет, существует ли чат с указанным идентификатором.
+     * @param chatId - идентификатор чата
+     * @return true, если чат существует, иначе false
+     */
+    boolean existsById(@NotNull Long chatId);
 
+    /**
+     * Вставляет связь между ссылкой и чатом.
+     * @param linkId - идентификатор ссылки
+     * @param chatId - идентификатор чата
+     */
     @Modifying
     @Transactional
-    @Query(value = "INSERT INTO link_tg_chat (link_id, tg_chat_id) VALUES (:linkId, :chatId) ON CONFLICT DO NOTHING", nativeQuery = true)
+    @Query(value = "INSERT INTO link_tg_chat (link_id, tg_chat_id)"
+        + " VALUES (:linkId, :chatId) ON CONFLICT DO NOTHING",
+        nativeQuery = true)
     void insertLinkChatRelation(Long linkId, Long chatId);
 
+    /**
+     * Удаляет связь между ссылкой и чатом.
+     * @param linkId - идентификатор ссылки
+     * @param chatId - идентификатор чата
+     */
     @Modifying
     @Transactional
-    @Query(value = "DELETE FROM link_tg_chat WHERE link_id = :linkId AND tg_chat_id = :chatId", nativeQuery = true)
+    @Query(value = "DELETE FROM link_tg_chat WHERE link_id = :linkId"
+        + " AND tg_chat_id = :chatId", nativeQuery = true)
     void deleteLinkChatRelation(Long linkId, Long chatId);
 }

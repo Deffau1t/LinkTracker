@@ -146,8 +146,8 @@ public class LinkTrackerBot {
         userStates.put(chatId, BotState.WAITING_FOR_TAGS);
         sendMessage(
             chatId,
-            "Введите теги в формате {tag1, tag2, ...}" +
-                "(напишите `-`, чтобы пропустить):"
+            "Введите теги в формате {tag1, tag2, ...}"
+                + "(напишите `-`, чтобы пропустить):"
         );
     }
 
@@ -177,8 +177,8 @@ public class LinkTrackerBot {
         userStates.put(chatId, BotState.WAITING_FOR_FILTERS);
         sendMessage(
             chatId,
-            "Введите фильтры в формате {filter1, filter2, ...}" +
-                "(напишите `-`, чтобы пропустить):"
+            "Введите фильтры в формате {filter1, filter2, ...}"
+                + "(напишите `-`, чтобы пропустить):"
         );
     }
 
