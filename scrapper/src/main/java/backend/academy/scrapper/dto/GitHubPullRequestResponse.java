@@ -5,18 +5,18 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * GitHubIssueResponse - класс для представления данных об issue на GitHub.
- * @param id - идентификатор
- * @param title - название
- * @param user - пользователь
- * @param updatedAt - дата обновления
- * @param body - описание
- * @param state - состояние
- * @param htmlUrl - ссылка на issue
- * @param pullRequest - ссылка на пулл реквест
+ * GitHubPullRequestResponse - класс для представления данных
+ * о Pull Request на GitHub.
+ * @param id - идентификатор PR
+ * @param title - название PR
+ * @param user - пользователь, создавший PR
+ * @param updatedAt - дата обновления PR
+ * @param body - описание PR
+ * @param state - состояние PR
+ * @param htmlUrl - ссылка на PR
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record GitHubIssueResponse(
+public record GitHubPullRequestResponse(
     @JsonProperty("id") Long id,
     @JsonProperty("title") String title,
     @JsonProperty("user") GitHubUser user,
@@ -29,8 +29,6 @@ public record GitHubIssueResponse(
     String updatedAt,
     @JsonProperty("body") String body,
     @JsonProperty("state") String state,
-    @JsonProperty("html_url") String htmlUrl,
-    @JsonProperty("pull_request")
-    Object pullRequest
+    @JsonProperty("html_url") String htmlUrl
 ) {
 }

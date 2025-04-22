@@ -1,0 +1,36 @@
+services:
+  postgres:
+    image: postgres:15.2
+    container_name: scrapper_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    healthcheck:
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  liquibase-migrations:
+    image: liquibase/liquibase:4.29
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - type: bind
+        source: ./scrapper/src/main/resources/db/changelog
+        target: /liquibase/changelog
+      - type: bind
+        source: ./lib/postgresql-42.7.3.jar
+        target: /liquibase/lib/postgresql.jar
+    command:
+      - --searchPath=/liquibase/changelog
+      - --changelog-file=db.changelog-master.xml
+      - --url=${POSTGRES_URL}
+      - --username=${POSTGRES_USERNAME}
+      - --password=${POSTGRES_PASSWORD}
+      - --classpath=/liquibase/lib/postgresql.jar
+      - update

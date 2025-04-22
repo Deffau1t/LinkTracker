@@ -1,5 +1,6 @@
 package backend.academy.scrapper;
 
+import backend.academy.scrapper.config.ScrapperConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -12,6 +13,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableConfigurationProperties({ScrapperConfig.class})
 @EnableScheduling
+@SuppressWarnings("HideUtilityClassConstructor")
 public class ScrapperApplication {
     /**
      * main method.

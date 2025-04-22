@@ -1,33 +1,44 @@
 package backend.academy.bot.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 /**
- * LinkUpdate model.
+ * LinkUpdate - класс для обновления ссылок в базе данных.
  */
 
 @Getter
+@Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class LinkUpdate {
     /**
-     * Уникальный идентификатор ссылки.
+     * Id - id ссылки.
      */
+    @JsonProperty("id")
     private Long id;
 
     /**
-     * URL ссылки.
+     * Url - ссылка.
      */
+    @JsonProperty("url")
     private String url;
 
     /**
-     * Описание ссылки.
+     * Description - описание ссылки.
      */
+    @JsonProperty("description")
     private String description;
 
     /**
-     * Список идентификаторов чатов Telegram, которые отслеживают эту ссылку.
+     * Tg_chat_ids - список чатов в которых нужно отправить ссылку.
      */
+    @JsonProperty("tg_chat_ids")
     private List<Long> tgChatIds;
 }

@@ -1,6 +1,7 @@
 package backend.academy.scrapper.dto;
 
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,15 +10,15 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * LinkUpdate - дто для обновления ссылки.
+ * LinkUpdateDTO - DTO для передачи данных об обновлениях ссылок в бот.
  */
-
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class LinkUpdate {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class LinkUpdateDTO {
     /**
      * Id - идентификатор ссылки.
      */
@@ -37,9 +38,20 @@ public class LinkUpdate {
     private String description;
 
     /**
-     * tgChatIds - список идентификаторов чатов Telegram,
-     * которые отслеживают эту ссылку.
+     * tags - теги ссылки.
      */
-    @JsonProperty("tgChatIds")
+    @JsonProperty("tags")
+    private List<String> tags;
+
+    /**
+     * filters - фильтры ссылки.
+     */
+    @JsonProperty("filters")
+    private List<String> filters;
+
+    /**
+     * tg_chat_ids - ID чатов для уведомлений.
+     */
+    @JsonProperty("tg_chat_ids")
     private List<Long> tgChatIds;
 }

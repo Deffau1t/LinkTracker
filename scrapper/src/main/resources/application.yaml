@@ -5,19 +5,35 @@ app:
     token: ${GITHUB_TOKEN}
   stackOverflow:
     key: ${SO_KEY}
-    accessToken: YOUR_STACKOVERFLOW_ACCESS_TOKEN
+    accessToken: SO_ACCESS_TOKEN
 
 bot:
   base-url: ${BOT_BASE_URL}
 
+database:
+  access-type: ORM
+
 spring:
   application:
     name: Scrapper
+  datasource:
+    url: ${POSTGRES_URL}
+    username: ${POSTGRES_USERNAME}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      schema: public
   liquibase:
-    enabled: false
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.xml
+    user: postgres
+    password: 1
+    url: ${POSTGRES_URL}
+    default-schema: public
   jpa:
     hibernate:
       ddl-auto: validate
+      default_schema: public
     open-in-view: false
   mvc:
     locale: ru_RU

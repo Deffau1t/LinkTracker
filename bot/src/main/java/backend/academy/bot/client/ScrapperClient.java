@@ -1,7 +1,12 @@
 package backend.academy.bot.client;
 
+import backend.academy.bot.model.LinkResponse;
+import backend.academy.bot.model.ListLinksResponse;
+import backend.academy.bot.model.TrackLinkRequest;
+import backend.academy.bot.model.UntrackLinkRequest;
+
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -34,7 +39,6 @@ public class ScrapperClient {
      * Конструктор класса ScrapperClient.
      * @param restTemplate - RestTemplate для отправки HTTP запросов.
      */
-    @Autowired
     public ScrapperClient(final RestTemplate restTemplate) {
         this.httpClient = restTemplate;
     }
@@ -45,23 +49,27 @@ public class ScrapperClient {
      * @param link - Ссылка для отслеживания.
      * @param tags - Теги для отслеживания.
      * @param filters - Фильтры для отслеживания.
+     * @return - true, если запрос успешно отправлен, иначе false.
      */
 
-    public void trackLink(final Long chatId, final String link,
-                          final String tags, final String filters) {
-        registerChatIfNeeded(chatId);
+    public boolean trackLink(final Long chatId,
+                          final String link,
+                          final String tags,
+                          final String filters) {
 
         String url = scrapperBaseUrl + "/links";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Tg-Chat-Id", chatId.toString());
+        HttpHeaders headers = createHeaders(chatId);
 
-        String requestBody = String.format(
-            "{\"link\":\"%s\", \"tags\":[\"%s\"], \"filters\":[\"%s\"]}",
-            link, tags, filters
+        TrackLinkRequest requestBody = new TrackLinkRequest(
+            link,
+            tags.isEmpty() ? List.of() : List.of(tags.split(" ")),
+            filters.isEmpty() ? List.of() : List.of(filters.split(" "))
         );
 
-        HttpEntity<String> request = new HttpEntity<>(requestBody, headers);
+        HttpEntity<TrackLinkRequest> request = new HttpEntity<>(
+            requestBody,
+            headers
+        );
 
         try {
             ResponseEntity<String> response = httpClient.postForEntity(
@@ -69,16 +77,62 @@ public class ScrapperClient {
                 request,
                 String.class
             );
-
             if (response.getStatusCode().is2xxSuccessful()) {
-                log.info("Ссылка успешно добавлена в scrapper!");
+                log.info("✅ Ссылка успешно добавлена в scrapper!");
+                return true;
             } else {
-                log.error("Ошибка сервера: {} - {}",
-                    response.getStatusCode(), response.getBody());
+                log.error(
+                    "❌ Ошибка сервера: {} - {}",
+                    response.getStatusCode(),
+                    response.getBody()
+                );
             }
         } catch (Exception e) {
-            log.error("Ошибка при отправке запроса: {}", e.getMessage());
+            log.error("🚨 Ошибка при отправке запроса: {}", e.getMessage());
         }
+        return false;
+    }
+
+    /**
+     * getTrackedLinks - Отправляет запрос на получение списка
+     * отслеживаемых ссылок.
+     * @param chatId - ID чата в Telegram.
+     * @return - Список отслеживаемых ссылок.
+     */
+    public List<LinkResponse> getTrackedLinks(final Long chatId) {
+        String url = scrapperBaseUrl + "/links";
+        HttpHeaders headers = createHeaders(chatId);
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+
+        try {
+            ResponseEntity<ListLinksResponse> response = httpClient.exchange(
+                url,
+                org.springframework.http.HttpMethod.GET,
+                request,
+                ListLinksResponse.class
+            );
+
+            if (response.getStatusCode().is2xxSuccessful()
+                && response.getBody() != null
+            ) {
+                log.info(
+                    "✅ Получены отслеживаемые ссылки для чата {}",
+                    chatId
+                );
+                return response.getBody().links();
+            } else {
+                log.warn(
+                    "⚠️ Не удалось получить ссылки для чата {}",
+                    chatId
+                );
+            }
+        } catch (Exception e) {
+            log.error(
+                "🚨 Ошибка при получении ссылок: {}", e.getMessage()
+            );
+        }
+
+        return List.of();
     }
 
     /**
@@ -87,7 +141,7 @@ public class ScrapperClient {
      * @param chatId - ID чата в Telegram.
      */
 
-    private void registerChatIfNeeded(final Long chatId) {
+    public void registerChatIfNeeded(final Long chatId) {
         String url = scrapperBaseUrl + "/tg-chat/" + chatId;
 
         try {
@@ -114,42 +168,52 @@ public class ScrapperClient {
      * untrackLink - Отправляет запрос на удаление ссылки из scrapper.
      * @param chatId - ID чата в Telegram.
      * @param link - Ссылка для удаления.
+     * @return - true, если запрос успешно отправлен, иначе false.
      */
 
-    public void untrackLink(final Long chatId, final String link) {
+    public boolean untrackLink(final Long chatId, final String link) {
         String url = scrapperBaseUrl + "/links";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Tg-Chat-Id", chatId.toString());
+        HttpHeaders headers = createHeaders(chatId);
 
-        HttpEntity<String> request =
-            new HttpEntity<>(String.format("{\"link\":\"%s\"}", link), headers);
-
-        log.info("Отправка запроса на удаление: {}", url);
-        log.info("Заголовки: {}", headers);
-        log.info("Тело запроса: {}", request.getBody());
+        UntrackLinkRequest requestBody = new UntrackLinkRequest(link);
+        HttpEntity<UntrackLinkRequest> request = new HttpEntity<>(
+            requestBody,
+            headers
+        );
 
         try {
             ResponseEntity<String> response = httpClient.exchange(
                 url,
                 org.springframework.http.HttpMethod.DELETE,
-                request, String.class);
+                request,
+                String.class
+            );
 
             if (response.getStatusCode().is2xxSuccessful()) {
-                log.info("Ссылка успешно удалена в scrapper.");
+                log.info("✅ Ссылка успешно удалена в scrapper.");
+                return true;
             } else {
                 log.error(
-                    "Ошибка при удалении: {} - {}",
+                    "❌ Ошибка при удалении: {} - {}",
                     response.getStatusCode(),
                     response.getBody()
                 );
             }
         } catch (Exception e) {
-            log.error(
-                "Ошибка при отправке запроса в scrapper: {}",
-                e.getMessage()
-            );
+            log.error("🚨 Ошибка при удалении ссылки: {}", e.getMessage());
         }
+        return false;
     }
 
+    /**
+     * createHeaders - Создает HTTP заголовки для запросов.
+     * @param chatId - ID чата в Telegram.
+     * @return - HTTP заголовки.
+     */
+    private HttpHeaders createHeaders(final Long chatId) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Tg-Chat-Id", chatId.toString());
+        return headers;
+    }
 }

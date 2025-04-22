@@ -1,20 +1,18 @@
-package backend.academy.scrapper.dto;
+package backend.academy.bot.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 /**
- * ListLinksResponse - модель ответа от сервера при запросе списка ссылок.
+ * ListLinksResponse - список ссылок.
  */
 
 @Getter
-@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

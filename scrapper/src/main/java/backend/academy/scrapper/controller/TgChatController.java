@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Min;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Validated
 @RestController
-@RequestMapping(value = "/tg-chat", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/tg-chat")
 public class TgChatController {
 
     /**
@@ -41,7 +40,7 @@ public class TgChatController {
     public ResponseEntity<?> registerChat(
         final @PathVariable("id") @Min(1) Long id
     ) {
-        if (tgChatService.isChatsRegistered(id)) {
+        if (tgChatService.isChatRegistered(id)) {
             return ResponseEntity.badRequest().body(
                 ApiErrorResponse.builder()
                     .description("Чат уже зарегистрирован")
@@ -82,7 +81,7 @@ public class TgChatController {
             );
         }
 
-        if (tgChatService.isChatsRegistered(id)) {
+        if (tgChatService.isChatRegistered(id)) {
             tgChatService.deleteChat(id);
             return ResponseEntity.ok(
                 Map.of("code",

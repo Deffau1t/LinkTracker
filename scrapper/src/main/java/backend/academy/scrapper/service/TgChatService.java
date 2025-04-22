@@ -1,45 +1,42 @@
 package backend.academy.scrapper.service;
 
-import lombok.Getter;
-import org.springframework.stereotype.Service;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import backend.academy.scrapper.entity.LinkUpdate;
+import java.util.List;
 
 /**
- * TgChatService - сервис для работы с чатами.
+ * TgChatService - интерфейс сервиса для работы с чатами Telegram.
  */
-
-@Service
-@Getter
-public class TgChatService {
+public interface TgChatService {
     /**
-     * registeredChats - мапа с зарегистрированными чатами.
+     * registerChat - метод для регистрации чата в базе данных.
+     * @param chatId - идентификатор чата в базе данных.
      */
-    private final Map<Long, Boolean> registeredChats
-        = new ConcurrentHashMap<>();
+    void registerChat(Long chatId);
 
     /**
-     * isChatsRegistered - метод для проверки, зарегистрирован ли чат.
-     * @param chatId - id чата.
-     * @return - true, если чат зарегистрирован, иначе false.
+     * deleteChat - метод для удаления чата из базы данных.
+     * @param chatId - идентификатор чата в базе данных.
      */
-    public boolean isChatsRegistered(final Long chatId) {
-        return registeredChats.containsKey(chatId);
-    }
+    void deleteChat(Long chatId);
 
     /**
-     * registerChat - метод для регистрации чата.
-     * @param chatId - id чата.
+     * getAllLinks - метод для получения списка ссылок
+     * на страницы обновлений для указанного чата.
+     * @param chatId - идентификатор чата в базе данных.
+     * @return список ссылок на страницы обновлений для указанного чата.
      */
-    public void registerChat(final Long chatId) {
-        registeredChats.putIfAbsent(chatId, true);
-    }
+    List<LinkUpdate> getAllLinks(Long chatId);
 
     /**
-     * deleteChat - метод для удаления чата.
-     * @param chatId - id чата.
+     * getChatIds - метод для получения списка идентификаторов чатов.
+     * @return список идентификаторов чатов.
      */
-    public void deleteChat(final Long chatId) {
-        registeredChats.remove(chatId);
-    }
+    List<Long> getAllChatIds();
+
+    /**
+     * isChatRegistered - метод для проверки регистрации чата.
+     * @param chatId - идентификатор чата в базе данных.
+     * @return true, если чат зарегистрирован, иначе false.
+     */
+    boolean isChatRegistered(Long chatId);
 }

@@ -1,6 +1,6 @@
 package backend.academy.scrapper.client;
 
-import backend.academy.scrapper.ScrapperConfig;
+import backend.academy.scrapper.config.ScrapperConfig;
 import backend.academy.scrapper.dto.StackOverflowAnswerResponse;
 import backend.academy.scrapper.dto.StackOverflowCommentResponse;
 import backend.academy.scrapper.dto.StackOverflowQuestionResponse;
