@@ -1,16 +1,12 @@
 package backend.academy.scrapper.service;
 
 import backend.academy.scrapper.entity.LinkUpdate;
+import backend.academy.scrapper.entity.TgChat;
 import backend.academy.scrapper.repository.TgChatRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import java.util.List;
-
-/**
- * OrmTgChatService - класс, реализующий интерфейс TgChatService
- * и предоставляющий реализацию работы с базой данных на основе ORM (Hibernate).
- */
 
 @Service
 @AllArgsConstructor
@@ -21,54 +17,56 @@ import java.util.List;
 )
 public class OrmTgChatService implements TgChatService {
     /**
-     * tgChatRepository - объект для работы с таблицей чатов в базе данных.
+     * tgChatRepository - репозиторий для работы с таблицей tg_chats.
      */
     private final TgChatRepository tgChatRepository;
 
     /**
      * registerChat - метод для регистрации чата в базе данных.
-     * @param chatId - идентификатор чата
+     * @param chatId - идентификатор чата в базе данных.
      */
     @Override
     public void registerChat(final Long chatId) {
-        tgChatRepository.registerChat(chatId);
+        if (!tgChatRepository.existsById(chatId)) {
+            tgChatRepository.save(new TgChat(chatId));
+        }
     }
 
     /**
      * deleteChat - метод для удаления чата из базы данных.
-     * @param chatId - идентификатор чата
+     * @param chatId - идентификатор чата в базе данных.
      */
     @Override
     public void deleteChat(final Long chatId) {
-        tgChatRepository.deleteChat(chatId);
+        tgChatRepository.deleteById(chatId);
     }
 
     /**
-     * getAllLinks - метод для получения всех ссылок для заданного чата.
-     * @param chatId - идентификатор чата
-     * @return список ссылок для заданного чата
+     * getAllLinks - метод для получения списка ссылок.
+     * @param chatId - идентификатор чата в базе данных.
+     * @return список ссылок на страницы обновлений для указанного чата.
      */
     @Override
     public List<LinkUpdate> getAllLinks(final Long chatId) {
-        return tgChatRepository.getAllLinks(chatId);
+        return tgChatRepository.findAllLinksByChatId(chatId);
     }
 
     /**
-     * getAllChatIds - метод для получения списка всех идентификаторов чатов.
-     * @return список всех идентификаторов чатов
+     * getAllChatIds - метод для получения списка идентификаторов чатов.
+     * @return список идентификаторов чатов.
      */
     @Override
     public List<Long> getAllChatIds() {
-        return tgChatRepository.getAllChatIds();
+        return tgChatRepository.findAllChatIds();
     }
 
     /**
      * isChatRegistered - метод для проверки регистрации чата.
-     * @param chatId - идентификатор чата
-     * @return true, если чат зарегистрирован, иначе false
+     * @param chatId - идентификатор чата в базе данных.
+     * @return true, если чат зарегистрирован, иначе false.
      */
     @Override
     public boolean isChatRegistered(final Long chatId) {
-        return tgChatRepository.existsChatById(chatId);
+        return tgChatRepository.existsById(chatId);
     }
 }

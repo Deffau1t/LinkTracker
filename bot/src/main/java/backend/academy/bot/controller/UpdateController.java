@@ -47,7 +47,7 @@ public class UpdateController {
 
             for (Long chatId : linkUpdate.tgChatIds()) {
                 linkTrackerBot.sendMessage(chatId,
-                    "\uD83D\uDD14 Обновление на "
+                    "Обновление на "
                         + linkUpdate.url()
                         + "\n"
                         + linkUpdate.description());
