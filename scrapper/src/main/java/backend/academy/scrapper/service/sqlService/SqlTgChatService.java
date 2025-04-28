@@ -1,7 +1,8 @@
-package backend.academy.scrapper.service;
+package backend.academy.scrapper.service.sqlService;
 
 
 import backend.academy.scrapper.entity.LinkUpdate;
+import backend.academy.scrapper.service.TgChatService;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jdbc.core.JdbcTemplate;
