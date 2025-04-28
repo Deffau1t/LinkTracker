@@ -6,6 +6,9 @@ app:
   stackOverflow:
     key: ${SO_KEY}
     accessToken: SO_ACCESS_TOKEN
+  kafka:
+    topic:
+      notifications: link-updates-topic
 
 bot:
   base-url: ${BOT_BASE_URL}
