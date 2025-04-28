@@ -1,6 +1,6 @@
 app:
-  github-api-url: https://api.github.com
-  stackoverflow-api-url: https://api.stackexchange.com/2.3
+  github-api-url: ${GITHUB_API_URL}
+  stackoverflow-api-url: ${STACKOVERFLOW_API_URL}
   github:
     token: ${GITHUB_TOKEN}
   stackOverflow:
