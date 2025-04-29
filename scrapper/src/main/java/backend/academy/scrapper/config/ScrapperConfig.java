@@ -1,6 +1,8 @@
 package backend.academy.scrapper.config;
 
 import jakarta.validation.constraints.NotEmpty;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
@@ -18,7 +20,9 @@ public record ScrapperConfig(
     @NotEmpty String githubApiUrl,
     @NotEmpty String stackoverflowApiUrl,
     GitHubCredentials github,
-    StackOverflowCredentials stackOverflow
+    StackOverflowCredentials stackOverflow,
+    KafkaConfig kafka,
+    @NotEmpty String messageTransport
 ) {
     /**
     * GitHubCredentials - данные для доступа к github api.
@@ -40,5 +44,10 @@ public record ScrapperConfig(
         @NotEmpty String accessToken
     ) {
 
+    }
+
+    public record KafkaConfig(
+        @NotEmpty String topicNotifications
+    ) {
     }
 }

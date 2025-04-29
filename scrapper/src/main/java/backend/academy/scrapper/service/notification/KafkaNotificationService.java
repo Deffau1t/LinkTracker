@@ -13,7 +13,7 @@ public class KafkaNotificationService implements NotificationService {
     private final String topic;
 
     public KafkaNotificationService(KafkaTemplate<String, LinkUpdateDTO> kafkaTemplate,
-                                     @Value("${app.kafka.topic.notifications}") String topic) {
+                                     @Value("${app.kafka.topicNotifications}") String topic) {
         this.kafkaTemplate = kafkaTemplate;
         this.topic = topic;
     }

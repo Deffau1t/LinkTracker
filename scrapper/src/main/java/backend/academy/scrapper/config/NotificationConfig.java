@@ -12,13 +12,13 @@ public class NotificationConfig {
 
     @Bean
     @ConditionalOnProperty(name = "app.message-transport", havingValue = "Kafka")
-    public NotificationService kafkaNotificationService(KafkaNotificationService kafkaNotificationService) {
+    public NotificationService kafkaMessagesNotificationService(KafkaNotificationService kafkaNotificationService) {
         return kafkaNotificationService;
     }
 
     @Bean
     @ConditionalOnProperty(name = "app.message-transport", havingValue = "HTTP")
-    public NotificationService httpNotificationService(HttpNotificationService httpNotificationService) {
+    public NotificationService httpMessagesNotificationService(HttpNotificationService httpNotificationService) {
         return httpNotificationService;
     }
 }
