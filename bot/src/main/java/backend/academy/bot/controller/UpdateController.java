@@ -1,7 +1,7 @@
 package backend.academy.bot.controller;
 
-import backend.academy.bot.model.ApiErrorResponse;
-import backend.academy.bot.model.LinkUpdate;
+import backend.academy.bot.dto.ApiErrorResponse;
+import backend.academy.bot.dto.LinkUpdate;
 import backend.academy.bot.service.LinkTrackerBot;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

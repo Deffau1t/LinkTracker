@@ -1,6 +1,9 @@
 app:
   telegram-token: ${TELEGRAM_TOKEN}
 
+  kafka:
+    topicNotifications: kafka-1
+
 scrapper:
   base-url: ${SCRAPPER_BASE_URL}
 

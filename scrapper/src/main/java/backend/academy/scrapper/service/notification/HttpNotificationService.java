@@ -3,10 +3,9 @@ package backend.academy.scrapper.service.notification;
 import backend.academy.scrapper.dto.LinkUpdateDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-@Service
+
 @Slf4j
 public class HttpNotificationService implements NotificationService {
     private final RestTemplate restTemplate;

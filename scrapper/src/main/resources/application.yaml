@@ -1,5 +1,5 @@
 app:
-  message-transport: HTTP
+  message-transport: Kafka
   github-api-url: ${GITHUB_API_URL}
   stackoverflow-api-url: ${STACKOVERFLOW_API_URL}
   github:
@@ -17,6 +17,11 @@ database:
   access-type: ORM
 
 spring:
+  kafka:
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
   application:
     name: Scrapper
   datasource:

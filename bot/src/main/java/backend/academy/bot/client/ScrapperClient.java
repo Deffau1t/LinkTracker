@@ -1,9 +1,9 @@
 package backend.academy.bot.client;
 
-import backend.academy.bot.model.LinkResponse;
-import backend.academy.bot.model.ListLinksResponse;
-import backend.academy.bot.model.TrackLinkRequest;
-import backend.academy.bot.model.UntrackLinkRequest;
+import backend.academy.bot.dto.LinkResponse;
+import backend.academy.bot.dto.ListLinksResponse;
+import backend.academy.bot.dto.TrackLinkRequest;
+import backend.academy.bot.dto.UntrackLinkRequest;
 
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;

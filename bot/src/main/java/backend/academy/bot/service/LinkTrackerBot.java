@@ -8,7 +8,7 @@ import backend.academy.bot.commandHandler.HelpCommandHandler;
 import backend.academy.bot.commandHandler.StartCommandHandler;
 import backend.academy.bot.commandHandler.TrackCommandHandler;
 import backend.academy.bot.commandHandler.UntrackCommandHandler;
-import backend.academy.bot.model.BotState;
+import backend.academy.bot.dto.BotState;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;

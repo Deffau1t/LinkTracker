@@ -1,4 +1,4 @@
 /**
  * Пакет моделей бота.
  */
-package backend.academy.bot.model;
+package backend.academy.bot.dto;

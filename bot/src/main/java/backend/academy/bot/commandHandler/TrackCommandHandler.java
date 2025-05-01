@@ -1,6 +1,6 @@
 package backend.academy.bot.commandHandler;
 
-import backend.academy.bot.model.BotState;
+import backend.academy.bot.dto.BotState;
 import backend.academy.bot.service.LinkTrackerBot;
 import lombok.AllArgsConstructor;
 import java.util.Map;
