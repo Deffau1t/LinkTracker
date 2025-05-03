@@ -1,5 +1,6 @@
 package backend.academy.bot.commandHandler;
 
+import backend.academy.bot.client.CachedScrapperClient;
 import backend.academy.bot.client.ScrapperClient;
 import backend.academy.bot.service.LinkTrackerBot;
 import lombok.AllArgsConstructor;
@@ -12,7 +13,7 @@ public class ListCommandHandler implements CommandHandler {
     /**
      * scrapperClient - клиент для получения списка отслеживаемых ссылок.
      */
-    private final ScrapperClient scrapperClient;
+    private final CachedScrapperClient cachedScrapperClient;
 
     /**
      * Возвращает /list, чтобы получить доступ к командам бота.
@@ -36,7 +37,7 @@ public class ListCommandHandler implements CommandHandler {
     ) {
         bot.sendMessage(
             chatId,
-            "Список ваших ссылок:\n" + scrapperClient.getTrackedLinks(chatId)
+            "Список ваших ссылок:\n" + cachedScrapperClient.getTrackedLinks(chatId)
         );
     }
 }
