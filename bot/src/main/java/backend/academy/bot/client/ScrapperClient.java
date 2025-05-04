@@ -51,7 +51,6 @@ public class ScrapperClient {
      * @param filters - Фильтры для отслеживания.
      * @return - true, если запрос успешно отправлен, иначе false.
      */
-
     public boolean trackLink(final Long chatId,
                           final String link,
                           final String tags,

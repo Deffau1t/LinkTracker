@@ -10,23 +10,39 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.*;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+/**
+ * RedisConfig - конфигурация для работы с Redis.
+ */
 
 @Configuration
 @EnableCaching
 public class RedisConfig {
-
+    /**
+     * Метод для создания фабрики подключения к Redis.
+     * @return RedisConnectionFactory, создающий фабрику подключения.
+     */
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
         return new LettuceConnectionFactory();
     }
 
+    /**
+     * Метод для создания шаблона для работы с Redis.
+     * @return Объект типа RedisTemplate, создающий шаблон для работы с Redis.
+     */
     @Bean
     public RedisTemplate<String, Object> redisTemplate() {
         ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+        objectMapper.setVisibility(PropertyAccessor.ALL,
+            JsonAutoDetect.Visibility.ANY);
         objectMapper.activateDefaultTyping(
-            BasicPolymorphicTypeValidator.builder().allowIfSubType(Object.class).build(),
+            BasicPolymorphicTypeValidator
+                .builder()
+                .allowIfSubType(Object.class)
+                .build(),
             ObjectMapper.DefaultTyping.NON_FINAL
         );
 

@@ -1,6 +1,5 @@
 package backend.academy.bot.commandHandler;
 
-import backend.academy.bot.client.CachedScrapperClient;
 import backend.academy.bot.client.ScrapperClient;
 import backend.academy.bot.service.LinkTrackerBot;
 import lombok.AllArgsConstructor;

@@ -45,8 +45,14 @@ public class LinkTrackerBot {
      */
     private final Map<Long, String> userTags = new HashMap<>();
 
+    /**
+     * Клиент для получения данных с сайта.
+     */
     private final ScrapperClient scrapperBotClient;
 
+    /**
+     * Клиент для получения данных с сайта.
+     */
     private final CachedScrapperClient cachedScrapperClient;
 
     /**
@@ -58,13 +64,13 @@ public class LinkTrackerBot {
     /**
      * LinkTrackerBot - конструктор класса.
      * @param botConfig - конфигурация бота.
-     * @param scrapperClient - клиент для получения данных с сайта.
+     * @param scrapperBotClient - клиент для получения данных с сайта.
+     * @param cachedScrapperClient - клиент для получения данных с сайта.
      */
 
     public LinkTrackerBot(final BotConfig botConfig,
-                          final ScrapperClient scrapperClient,
-                          ScrapperClient scrapperBotClient,
-                          CachedScrapperClient cachedScrapperClient
+                          final ScrapperClient scrapperBotClient,
+                          final CachedScrapperClient cachedScrapperClient
     ) {
         this.scrapperBotClient = scrapperBotClient;
         this.cachedScrapperClient = cachedScrapperClient;

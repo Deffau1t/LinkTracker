@@ -1,6 +1,5 @@
 package backend.academy.scrapper;
 
-import backend.academy.scrapper.client.BotClient;
 import backend.academy.scrapper.client.GitHubClient;
 import backend.academy.scrapper.client.StackOverflowClient;
 import backend.academy.scrapper.dto.GitHubIssueResponse;
@@ -9,6 +8,7 @@ import backend.academy.scrapper.dto.LinkUpdateDTO;
 import backend.academy.scrapper.entity.LinkUpdate;
 import backend.academy.scrapper.repository.LinksRepository;
 import backend.academy.scrapper.repository.TgChatRepository;
+import backend.academy.scrapper.service.notification.NotificationService;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
@@ -17,7 +17,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import backend.academy.scrapper.service.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
