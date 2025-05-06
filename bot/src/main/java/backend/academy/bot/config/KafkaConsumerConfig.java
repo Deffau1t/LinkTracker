@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -28,13 +29,18 @@ import org.springframework.util.backoff.FixedBackOff;
 @Configuration
 public class KafkaConsumerConfig {
     /**
+     * bootstrapServers - адрес сервера Kafka.
+     */
+    @Value("${app.kafka.bootstrap-servers}")
+    private String bootstrapServers;
+    /**
      * Метод для создания потребителя сообщений топика Kafka.
      * @return Объект типа ConsumerFactory, создающий потребителя сообщений.
      */
     @Bean
     public ConsumerFactory<String, LinkUpdateDTO> consumerFactory() {
         Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "bot-group");
 
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
@@ -109,7 +115,7 @@ public class KafkaConsumerConfig {
     @Bean
     public ProducerFactory<String, Object> producerFactory() {
         Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         return new DefaultKafkaProducerFactory<>(props);
     }
 }

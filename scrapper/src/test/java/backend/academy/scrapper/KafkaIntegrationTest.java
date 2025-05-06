@@ -14,6 +14,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import org.springframework.kafka.listener.MessageListener;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
@@ -25,22 +26,25 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
 
-@SpringBootTest
+@ActiveProfiles("test")
 @Testcontainers
 public class KafkaIntegrationTest {
 
     @Container
     static GenericContainer<?> kafka = new GenericContainer<>("confluentinc/cp-kafka:7.2.2")
-        .withExposedPorts(9092, 29092, 2181)
+        .withExposedPorts(9092, 29092)
         .withEnv("KAFKA_BROKER_ID", "1")
         .withEnv("KAFKA_ZOOKEEPER_CONNECT", "localhost:2181")
         .withEnv("KAFKA_LISTENER_SECURITY_PROTOCOL_MAP", "PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT")
-        .withEnv("KAFKA_ADVERTISED_LISTENERS", "PLAINTEXT://localhost:29092,PLAINTEXT_HOST://localhost:9092")
-        .withEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1")
+        .withEnv("KAFKA_ADVERTISED_LISTENERS",
+            "PLAINTEXT://host.testcontainers.internal:29092,PLAINTEXT_HOST://host.testcontainers.internal:9092")
+        .withEnv("KAFKA_LISTENERS",
+            "PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092")
         .withEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "true")
-        .withEnv("KAFKA_LISTENERS", "PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092")
+        .withEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1")
         .withEnv("KAFKA_INTER_BROKER_LISTENER_NAME", "PLAINTEXT")
         .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofMinutes(2)));
+
 
     @Container
     static GenericContainer<?> redis = new GenericContainer<>("redis:7.2.3")
@@ -48,10 +52,8 @@ public class KafkaIntegrationTest {
 
     @DynamicPropertySource
     static void configure(DynamicPropertyRegistry registry) {
-        registry.add("spring.kafka.bootstrap-servers", () ->
-            "PLAINTEXT://" + kafka.getHost() + ":" + kafka.getMappedPort(29092));
-        registry.add("spring.redis.host", redis::getHost);
-        registry.add("spring.redis.port", () -> redis.getMappedPort(6379));
+        String broker = kafka.getHost() + ":" + kafka.getMappedPort(29092);
+        registry.add("spring.kafka.bootstrap-servers", () -> broker);
     }
 
     @Autowired KafkaTemplate<String, String> kafkaTemplate;
@@ -62,7 +64,7 @@ public class KafkaIntegrationTest {
     @BeforeEach
     void setupDlqConsumer() {
         Map<String, Object> consumerProps = new HashMap<>();
-        consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "PLAINTEXT://" + kafka.getHost() + ":" + kafka.getMappedPort(29092));
+        consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafka.getHost() + ":" + kafka.getMappedPort(29092));
         consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "test-dlq-group");
         consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);

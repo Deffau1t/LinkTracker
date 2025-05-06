@@ -26,6 +26,12 @@ import java.util.Map;
 @Configuration
 public class NotificationConfig {
     /**
+     * bootstrapServers - Строка, содержащая адреса брокеров Kafka.
+     */
+    @Value("${app.kafka.bootstrap-servers}")
+    private String bootstrapServers;
+
+    /**
      * kafkaMessagesNotificationService - Метод для создания объекта,
      * который отправляет уведомления на Kafka.
      * @param kafkaTemplate - kafka-шаблон
@@ -72,7 +78,7 @@ public class NotificationConfig {
     public ProducerFactory<String, LinkUpdateDTO> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
-            "localhost:9092");
+            bootstrapServers);
 
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
             StringSerializer.class);

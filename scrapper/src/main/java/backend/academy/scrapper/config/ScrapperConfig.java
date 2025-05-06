@@ -49,9 +49,11 @@ public record ScrapperConfig(
     /**
      * KafkaConfig - настройки Kafka.
      * @param topicNotifications - топик для отправки уведомлений
+     * @param bootstrapServers - сервера для подключения к Kafka
      */
     public record KafkaConfig(
-        @NotEmpty String topicNotifications
+        @NotEmpty String topicNotifications,
+        @NotEmpty String bootstrapServers
     ) {
     }
 }

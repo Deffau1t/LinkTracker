@@ -64,16 +64,16 @@ public class LinkTrackerBot {
     /**
      * LinkTrackerBot - конструктор класса.
      * @param botConfig - конфигурация бота.
-     * @param scrapperBotClient - клиент для получения данных с сайта.
-     * @param cachedScrapperClient - клиент для получения данных с сайта.
+     * @param scrapperClient - клиент для получения данных с сайта.
+     * @param cachedClient - клиент для получения данных с сайта.
      */
 
     public LinkTrackerBot(final BotConfig botConfig,
-                          final ScrapperClient scrapperBotClient,
-                          final CachedScrapperClient cachedScrapperClient
+                          final ScrapperClient scrapperClient,
+                          final CachedScrapperClient cachedClient
     ) {
-        this.scrapperBotClient = scrapperBotClient;
-        this.cachedScrapperClient = cachedScrapperClient;
+        this.scrapperBotClient = scrapperClient;
+        this.cachedScrapperClient = cachedClient;
         this.bot = new TelegramBot(botConfig.telegramToken());
 
         commandHandlers.put("/start", new StartCommandHandler(

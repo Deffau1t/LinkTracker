@@ -21,14 +21,14 @@ public class KafkaNotificationService implements NotificationService {
     /**
      * Конструктор класса KafkaNotificationService.
      * @param template - шаблон для отправки сообщений на Kafka.
-     * @param topic - имя топика, на который будут отправляться уведомления.
+     * @param kafkaTopic - топик, на который будут отправляться уведомления.
      */
     public KafkaNotificationService(
         final KafkaTemplate<String, LinkUpdateDTO> template,
-        final @Value("${app.kafka.topicNotifications}") String topic
+        final @Value("${app.kafka.topicNotifications}") String kafkaTopic
     ) {
         this.kafkaTemplate = template;
-        this.topic = topic;
+        this.topic = kafkaTopic;
     }
 
     /**

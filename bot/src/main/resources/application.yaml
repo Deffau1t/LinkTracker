@@ -2,7 +2,8 @@ app:
   telegram-token: ${TELEGRAM_TOKEN}
 
   kafka:
-    topicNotifications: kafka-1
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    topicNotifications: ${KAFKA_TOPIC_NAME}
 
 scrapper:
   base-url: ${SCRAPPER_BASE_URL}
