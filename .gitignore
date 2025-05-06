@@ -25,3 +25,4 @@ hs_err_pid*
 /bot/src/main/resources/bot.env
 /scrapper/src/main/resources/scrapper.env
 /scrapper/src/test/resources/test.env
+scrapper/src/main/resources/application.yaml
