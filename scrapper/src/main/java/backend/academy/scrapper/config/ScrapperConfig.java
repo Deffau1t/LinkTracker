@@ -10,6 +10,8 @@ import org.springframework.validation.annotation.Validated;
  * @param stackoverflowApiUrl - ссылка на api stackoverflow
  * @param github - данные для доступа к github api
  * @param stackOverflow - данные для доступа к stackoverflow api
+ * @param kafka - настройки Kafka
+ * @param messageTransport - транспорт для отправки сообщений
  */
 
 @Validated
@@ -18,7 +20,9 @@ public record ScrapperConfig(
     @NotEmpty String githubApiUrl,
     @NotEmpty String stackoverflowApiUrl,
     GitHubCredentials github,
-    StackOverflowCredentials stackOverflow
+    StackOverflowCredentials stackOverflow,
+    KafkaConfig kafka,
+    @NotEmpty String messageTransport
 ) {
     /**
     * GitHubCredentials - данные для доступа к github api.
@@ -40,5 +44,16 @@ public record ScrapperConfig(
         @NotEmpty String accessToken
     ) {
 
+    }
+
+    /**
+     * KafkaConfig - настройки Kafka.
+     * @param topicNotifications - топик для отправки уведомлений
+     * @param bootstrapServers - сервера для подключения к Kafka
+     */
+    public record KafkaConfig(
+        @NotEmpty String topicNotifications,
+        @NotEmpty String bootstrapServers
+    ) {
     }
 }

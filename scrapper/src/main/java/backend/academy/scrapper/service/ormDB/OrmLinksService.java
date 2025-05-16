@@ -1,4 +1,4 @@
-package backend.academy.scrapper.service;
+package backend.academy.scrapper.service.ormDB;
 
 import backend.academy.scrapper.dto.LinkResponse;
 import backend.academy.scrapper.dto.RemoveLinkRequest;
@@ -7,6 +7,7 @@ import backend.academy.scrapper.entity.TgChat;
 import backend.academy.scrapper.repository.LinksRepository;
 import java.util.Optional;
 import backend.academy.scrapper.repository.TgChatRepository;
+import backend.academy.scrapper.service.LinksService;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
