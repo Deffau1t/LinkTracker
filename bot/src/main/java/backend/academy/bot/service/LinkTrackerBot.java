@@ -146,7 +146,8 @@ public class LinkTrackerBot {
         userStates.put(chatId, BotState.WAITING_FOR_TAGS);
         sendMessage(
             chatId,
-            "Введите фильтры через пробел(напишите `-`, чтобы пропустить):"
+            "Введите теги в формате {tag1, tag2, ...}"
+                + "(напишите `-`, чтобы пропустить):"
         );
     }
 
@@ -157,15 +158,9 @@ public class LinkTrackerBot {
      */
     private void handleUntrack(final Long chatId, final String text) {
         if (scrapperBotClient.untrackLink(chatId, text)) {
-            sendMessage(
-            chatId,
-            "Ссылка успешно удалена."
-            );
+            sendMessage(chatId, "Ссылка успешно удалена.");
         } else {
-                sendMessage(
-                chatId,
-                "Произошла ошибка при удалении ссылки."
-                );
+                sendMessage(chatId, "Произошла ошибка при удалении ссылки.");
         }
         userStates.put(chatId, BotState.IDLE);
     }
@@ -182,7 +177,8 @@ public class LinkTrackerBot {
         userStates.put(chatId, BotState.WAITING_FOR_FILTERS);
         sendMessage(
             chatId,
-            "Введите фильтры через пробел(напишите `-`, чтобы пропустить):"
+            "Введите фильтры в формате {filter1, filter2, ...}"
+                + "(напишите `-`, чтобы пропустить):"
         );
     }
 
@@ -197,14 +193,9 @@ public class LinkTrackerBot {
         String filters = text.equals("-") ? "" : text;
 
         if (scrapperBotClient.trackLink(chatId, link, tags, filters)) {
-            sendMessage(
-                chatId,
-                "Ссылка успешно добавлена."
-            );
+            sendMessage(chatId, "Ссылка успешно добавлена.");
         } else {
-            sendMessage(
-                chatId,
-                "Произошла ошибка при добавлении ссылки.");
+            sendMessage(chatId, "Произошла ошибка при добавлении ссылки.");
         }
 
         userStates.put(chatId, BotState.IDLE);

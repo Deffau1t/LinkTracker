@@ -78,17 +78,17 @@ public class ScrapperClient {
                 String.class
             );
             if (response.getStatusCode().is2xxSuccessful()) {
-                log.info("✅ Ссылка успешно добавлена в scrapper!");
+                log.info("Ссылка успешно добавлена в scrapper!");
                 return true;
             } else {
                 log.error(
-                    "❌ Ошибка сервера: {} - {}",
+                    "Ошибка сервера: {} - {}",
                     response.getStatusCode(),
                     response.getBody()
                 );
             }
         } catch (Exception e) {
-            log.error("🚨 Ошибка при отправке запроса: {}", e.getMessage());
+            log.error("Ошибка при отправке запроса: {}", e.getMessage());
         }
         return false;
     }
@@ -115,21 +115,13 @@ public class ScrapperClient {
             if (response.getStatusCode().is2xxSuccessful()
                 && response.getBody() != null
             ) {
-                log.info(
-                    "✅ Получены отслеживаемые ссылки для чата {}",
-                    chatId
-                );
+                log.info("Получены отслеживаемые ссылки для чата {}", chatId);
                 return response.getBody().links();
             } else {
-                log.warn(
-                    "⚠️ Не удалось получить ссылки для чата {}",
-                    chatId
-                );
+                log.warn("Не удалось получить ссылки для чата {}", chatId);
             }
         } catch (Exception e) {
-            log.error(
-                "🚨 Ошибка при получении ссылок: {}", e.getMessage()
-            );
+            log.error("Ошибка при получении ссылок: {}", e.getMessage());
         }
 
         return List.of();
@@ -157,7 +149,7 @@ public class ScrapperClient {
                 log.warn(
                     "Чат {} уже зарегистрирован или произошла ошибка",
                     chatId);
-            }
+                }
         } catch (Exception e) {
             log.error("Ошибка при регистрации чата: {}", e.getMessage());
         }
@@ -190,17 +182,17 @@ public class ScrapperClient {
             );
 
             if (response.getStatusCode().is2xxSuccessful()) {
-                log.info("✅ Ссылка успешно удалена в scrapper.");
+                log.info("Ссылка успешно удалена в scrapper.");
                 return true;
             } else {
                 log.error(
-                    "❌ Ошибка при удалении: {} - {}",
+                    "Ошибка при удалении: {} - {}",
                     response.getStatusCode(),
                     response.getBody()
                 );
             }
         } catch (Exception e) {
-            log.error("🚨 Ошибка при удалении ссылки: {}", e.getMessage());
+            log.error("Ошибка при удалении ссылки: {}", e.getMessage());
         }
         return false;
     }

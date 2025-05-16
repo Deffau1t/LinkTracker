@@ -1,6 +1,9 @@
 package backend.academy.scrapper;
 
+import backend.academy.scrapper.dto.LinkResponse;
+import backend.academy.scrapper.dto.RemoveLinkRequest;
 import backend.academy.scrapper.entity.LinkUpdate;
+import backend.academy.scrapper.entity.TgChat;
 import backend.academy.scrapper.repository.LinksRepository;
 import backend.academy.scrapper.repository.TgChatRepository;
 import java.sql.Array;
@@ -8,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import backend.academy.scrapper.service.LinksService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +38,9 @@ public class LinkRepositoryTest {
 
     @Autowired
     private LinksRepository linksRepository;
+
+    @Autowired
+    private LinksService linksService;
 
     @Autowired
     private TgChatRepository tgChatRepository;
@@ -66,8 +73,9 @@ public class LinkRepositoryTest {
         String url = "https://example.com";
 
         // Act
-        tgChatRepository.registerChat(chatId);
-        linksRepository.addLink(chatId, url, tags, filters);
+        tgChatRepository.save(new TgChat(chatId));
+        LinkResponse response = new LinkResponse(0L, url, tags, filters);
+        linksService.addLink(chatId, response);
         Optional<LinkUpdate> found = linksRepository.findByUrl(url);
 
         // Assert
@@ -85,8 +93,9 @@ public class LinkRepositoryTest {
         List<String> emptyList = Collections.emptyList();
 
         // Act
-        tgChatRepository.registerChat(chatId);
-        linksRepository.addLink(chatId, url, emptyList, emptyList);
+        tgChatRepository.save(new TgChat(chatId));
+        LinkResponse response = new LinkResponse(0L, url, emptyList, emptyList);
+        linksService.addLink(chatId, response);
 
         // Получаем данные через JdbcTemplate
         List<String> tags = jdbcTemplate.queryForObject(
@@ -109,8 +118,9 @@ public class LinkRepositoryTest {
         // Arrange
         long chatId = 125L;
         String url = "https://example.com";
-        tgChatRepository.registerChat(chatId);
-        linksRepository.addLink(chatId, url, List.of("test"), List.of("filter"));
+        tgChatRepository.save(new TgChat(chatId));
+        LinkResponse response = new LinkResponse(0L, url, List.of("test"), List.of("filter"));
+        linksService.addLink(chatId, response);
 
         Integer initialCount = jdbcTemplate.queryForObject(
             "SELECT COUNT(*) FROM link_tg_chat WHERE tg_chat_id = ? AND link_id = " +
@@ -121,7 +131,8 @@ public class LinkRepositoryTest {
         assertThat(initialCount).isEqualTo(1);
 
         // Act
-        linksRepository.removeLink(chatId, url);
+        RemoveLinkRequest removeLinkRequest = new RemoveLinkRequest(url);
+        linksService.removeLink(chatId, removeLinkRequest);
 
         // Assert
         Integer relationCount = jdbcTemplate.queryForObject(

@@ -58,11 +58,10 @@ public class StackOverflowClient {
             .retrieve()
             .bodyToMono(StackOverflowQuestionResponse.class)
             .doOnSuccess(response -> log.info(
-                "📥 Получен вопрос {}: {}",
-                questionId,
-                response))
+                "Получен вопрос {}: {}", questionId, response)
+            )
             .doOnError(
-                error -> log.error("❌ Ошибка при запросе вопроса {}: {}",
+                error -> log.error("Ошибка при запросе вопроса {}: {}",
                     questionId,
                     error.getMessage())
             );
@@ -90,7 +89,7 @@ public class StackOverflowClient {
             )
             .map(StackOverflowResponseWrapper::items)
             .doOnError(error -> log.error(
-                "❌ Ошибка при запросе комментариев {}: {}",
+                "Ошибка при запросе комментариев {}: {}",
                 questionId,
                 error.getMessage())
             );
@@ -118,7 +117,7 @@ public class StackOverflowClient {
             )
             .map(StackOverflowResponseWrapper::items)
             .doOnError(error -> log.error(
-                "❌ Ошибка при запросе ответов {}: {}",
+                "Ошибка при запросе ответов {}: {}",
                 questionId,
                 error.getMessage())
             );
