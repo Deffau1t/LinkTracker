@@ -1,4 +1,4 @@
-package backend.academy.bot.model;
+package backend.academy.bot.dto;
 
 import java.util.List;
 import lombok.Builder;

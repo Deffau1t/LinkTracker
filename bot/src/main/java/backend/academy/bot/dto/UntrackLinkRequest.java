@@ -1,4 +1,4 @@
-package backend.academy.bot.model;
+package backend.academy.bot.dto;
 
 /**
  * UntrackLinkRequest - DTO для запроса на отслеживание ссылки.

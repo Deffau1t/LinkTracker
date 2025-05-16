@@ -1,8 +1,9 @@
-package backend.academy.scrapper.service;
+package backend.academy.scrapper.service.sqlDB;
 
 import backend.academy.scrapper.dto.LinkResponse;
 import backend.academy.scrapper.dto.RemoveLinkRequest;
 import backend.academy.scrapper.entity.LinkUpdate;
+import backend.academy.scrapper.service.LinksService;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.dao.EmptyResultDataAccessException;
