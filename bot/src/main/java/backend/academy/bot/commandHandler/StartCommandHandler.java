@@ -36,6 +36,6 @@ public class StartCommandHandler implements CommandHandler {
                         final LinkTrackerBot bot
     ) {
         scrapperClient.registerChatIfNeeded(chatId);
-        bot.sendMessage(chatId, "✅ Вы успешно зарегистрированы в системе.");
+        bot.sendMessage(chatId, "Вы успешно зарегистрированы в системе.");
     }
 }

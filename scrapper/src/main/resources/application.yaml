@@ -1,11 +1,15 @@
 app:
-  github-api-url: https://api.github.com
-  stackoverflow-api-url: https://api.stackexchange.com/2.3
+  message-transport: Kafka
+  github-api-url: ${GITHUB_API_URL}
+  stackoverflow-api-url: ${STACKOVERFLOW_API_URL}
   github:
     token: ${GITHUB_TOKEN}
   stackOverflow:
     key: ${SO_KEY}
     accessToken: SO_ACCESS_TOKEN
+  kafka:
+    topicNotifications: ${KAFKA_TOPIC_NAME}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
 
 bot:
   base-url: ${BOT_BASE_URL}
@@ -14,6 +18,12 @@ database:
   access-type: ORM
 
 spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
   application:
     name: Scrapper
   datasource:

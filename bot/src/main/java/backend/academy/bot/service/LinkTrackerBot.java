@@ -1,5 +1,6 @@
 package backend.academy.bot.service;
 
+import backend.academy.bot.client.CachedScrapperClient;
 import backend.academy.bot.commandHandler.ListCommandHandler;
 import backend.academy.bot.config.BotConfig;
 import backend.academy.bot.client.ScrapperClient;
@@ -8,7 +9,7 @@ import backend.academy.bot.commandHandler.HelpCommandHandler;
 import backend.academy.bot.commandHandler.StartCommandHandler;
 import backend.academy.bot.commandHandler.TrackCommandHandler;
 import backend.academy.bot.commandHandler.UntrackCommandHandler;
-import backend.academy.bot.model.BotState;
+import backend.academy.bot.dto.BotState;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
@@ -45,9 +46,14 @@ public class LinkTrackerBot {
     private final Map<Long, String> userTags = new HashMap<>();
 
     /**
-     * Клиент скраппера.
+     * Клиент для получения данных с сайта.
      */
     private final ScrapperClient scrapperBotClient;
+
+    /**
+     * Клиент для получения данных с сайта.
+     */
+    private final CachedScrapperClient cachedScrapperClient;
 
     /**
      * Команды бота - хранит обработчики команд.
@@ -59,11 +65,15 @@ public class LinkTrackerBot {
      * LinkTrackerBot - конструктор класса.
      * @param botConfig - конфигурация бота.
      * @param scrapperClient - клиент для получения данных с сайта.
+     * @param cachedClient - клиент для получения данных с сайта.
      */
 
     public LinkTrackerBot(final BotConfig botConfig,
-                          final ScrapperClient scrapperClient) {
+                          final ScrapperClient scrapperClient,
+                          final CachedScrapperClient cachedClient
+    ) {
         this.scrapperBotClient = scrapperClient;
+        this.cachedScrapperClient = cachedClient;
         this.bot = new TelegramBot(botConfig.telegramToken());
 
         commandHandlers.put("/start", new StartCommandHandler(
@@ -78,7 +88,7 @@ public class LinkTrackerBot {
             userStates)
         );
         commandHandlers.put("/list", new ListCommandHandler(
-            scrapperBotClient)
+            cachedScrapperClient)
         );
 
         this.bot.setUpdatesListener(
@@ -157,7 +167,7 @@ public class LinkTrackerBot {
      * @param text - текст сообщения.
      */
     private void handleUntrack(final Long chatId, final String text) {
-        if (scrapperBotClient.untrackLink(chatId, text)) {
+        if (cachedScrapperClient.untrackLink(chatId, text)) {
             sendMessage(chatId, "Ссылка успешно удалена.");
         } else {
                 sendMessage(chatId, "Произошла ошибка при удалении ссылки.");
@@ -192,7 +202,7 @@ public class LinkTrackerBot {
         String tags = userTags.getOrDefault(chatId, "");
         String filters = text.equals("-") ? "" : text;
 
-        if (scrapperBotClient.trackLink(chatId, link, tags, filters)) {
+        if (cachedScrapperClient.trackLink(chatId, link, tags, filters)) {
             sendMessage(chatId, "Ссылка успешно добавлена.");
         } else {
             sendMessage(chatId, "Произошла ошибка при добавлении ссылки.");

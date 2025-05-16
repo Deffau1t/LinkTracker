@@ -1,6 +1,5 @@
 package backend.academy.scrapper;
 
-import backend.academy.scrapper.client.BotClient;
 import backend.academy.scrapper.client.GitHubClient;
 import backend.academy.scrapper.client.StackOverflowClient;
 import backend.academy.scrapper.dto.GitHubIssueResponse;
@@ -9,6 +8,7 @@ import backend.academy.scrapper.dto.LinkUpdateDTO;
 import backend.academy.scrapper.entity.LinkUpdate;
 import backend.academy.scrapper.repository.LinksRepository;
 import backend.academy.scrapper.repository.TgChatRepository;
+import backend.academy.scrapper.service.notification.NotificationService;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
@@ -40,9 +40,9 @@ public class LinkCheckScheduler {
      */
     private final StackOverflowClient stackOverflowClient;
     /**
-     * BotClient - Клиент для работы с Telegram Bot API.
+     * NotificationService - Сервис для отправки уведомлений.
      */
-    private final BotClient botClient;
+    private final NotificationService notificationService;
     /**
      * TgChatRepository - Репозиторий для работы с данными чатов Telegram.
      */
@@ -89,7 +89,7 @@ public class LinkCheckScheduler {
      */
     @Scheduled(fixedRate = FIXED_RATE)
     public void checkForUpdates() {
-        log.info("🔍 Запуск проверки обновлений...");
+        log.info("Запуск проверки обновлений...");
 
         List<Long> chatIds = tgChatRepository.findAllChatIds();
 
@@ -209,7 +209,7 @@ public class LinkCheckScheduler {
         final String link,
         final Long chatId
     ) {
-        log.info("🔍 Проверка обновлений StackOverflow для: {}", link);
+        log.info("Проверка обновлений StackOverflow для: {}", link);
         try {
             Long questionId = extractQuestionId(link);
             if (questionId == null) {
@@ -281,7 +281,7 @@ public class LinkCheckScheduler {
                 .tgChatIds(chatIds)
                 .build();
 
-            botClient.sendUpdate(dto);
+            notificationService.sendNotification(dto);
         }
     }
 

@@ -1,4 +1,4 @@
-package backend.academy.bot.model;
+package backend.academy.bot.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
